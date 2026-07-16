@@ -78,7 +78,7 @@ public class UserAccountService {
 
     // 3. Fallbacks für fehlende Attribute
     if (mail == null) {
-      mail = loginName.contains("@") ? loginName : loginName + "@schulungsplanung.de";
+      mail = loginName.contains("@") ? loginName : loginName + "@maintenancetool.de";
     }
     if (name == null) {
       name = loginName;

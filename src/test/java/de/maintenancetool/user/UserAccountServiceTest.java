@@ -80,7 +80,7 @@ class UserAccountServiceTest {
     when(auth.getName()).thenReturn("admin");
     when(auth.getPrincipal()).thenReturn("admin");
 
-    when(userAccountRepository.findByMailAdresse("admin@schulungsplanung.de"))
+    when(userAccountRepository.findByMailAdresse("admin@maintenancetool.de"))
         .thenReturn(Optional.empty());
     when(userAccountRepository.count()).thenReturn(1L); // DB is not empty
     when(userAccountRepository.save(any(UserAccount.class)))
@@ -100,7 +100,7 @@ class UserAccountServiceTest {
     when(auth.getName()).thenReturn("manager");
     when(auth.getPrincipal()).thenReturn("manager");
 
-    when(userAccountRepository.findByMailAdresse("manager@schulungsplanung.de"))
+    when(userAccountRepository.findByMailAdresse("manager@maintenancetool.de"))
         .thenReturn(Optional.empty());
     when(userAccountRepository.count()).thenReturn(1L); // DB is not empty
     when(userAccountRepository.save(any(UserAccount.class)))
@@ -123,13 +123,13 @@ class UserAccountServiceTest {
     UserAccount existingUser =
         UserAccount.builder()
             .id(UUID.randomUUID())
-            .mailAdresse("admin@schulungsplanung.de")
+            .mailAdresse("admin@maintenancetool.de")
             .vollerName("Admin User")
             .loginName("admin")
             .rollen(new HashSet<>(Set.of(Rolle.ROLE_TEILNEHMER))) // only has TEILNEHMER initially
             .build();
 
-    when(userAccountRepository.findByMailAdresse("admin@schulungsplanung.de"))
+    when(userAccountRepository.findByMailAdresse("admin@maintenancetool.de"))
         .thenReturn(Optional.of(existingUser));
     when(userAccountRepository.save(any(UserAccount.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
@@ -193,7 +193,7 @@ class UserAccountServiceTest {
     when(auth.getName()).thenReturn("alice");
     when(auth.getPrincipal()).thenReturn("alice");
 
-    when(userAccountRepository.findByMailAdresse("alice@schulungsplanung.de"))
+    when(userAccountRepository.findByMailAdresse("alice@maintenancetool.de"))
         .thenReturn(Optional.empty());
     when(userAccountRepository.count()).thenReturn(0L); // DB is completely empty!
     when(userAccountRepository.save(any(UserAccount.class)))
@@ -233,13 +233,13 @@ class UserAccountServiceTest {
     UserAccount existingManager =
         UserAccount.builder()
             .id(UUID.randomUUID())
-            .mailAdresse("manager@schulungsplanung.de")
+            .mailAdresse("manager@maintenancetool.de")
             .vollerName("Manager User")
             .loginName("manager")
             .rollen(new HashSet<>(Set.of(Rolle.ROLE_TEILNEHMER)))
             .build();
 
-    when(userAccountRepository.findByMailAdresse("manager@schulungsplanung.de"))
+    when(userAccountRepository.findByMailAdresse("manager@maintenancetool.de"))
         .thenReturn(Optional.of(existingManager));
     when(userAccountRepository.save(any(UserAccount.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));

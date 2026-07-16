@@ -13,5 +13,5 @@
     </root>
 
     <!-- Suppress expected error logs from GlobalExceptionHandler during unit tests -->
-    <logger name="de.schulungsplanung.error.GlobalExceptionHandler" level="OFF" />
+    <logger name="de.maintenancetool.error.GlobalExceptionHandler" level="OFF" />
 </configuration>
