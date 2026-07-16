@@ -20,7 +20,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <frontend-maven-plugin.version>1.15.0</frontend-maven-plugin.version>
+        <frontend-maven-plugin.version>2.0.1</frontend-maven-plugin.version>
         <node.version>v20.11.0</node.version>
         <npm.version>10.2.4</npm.version>
         <unboundid-ldapsdk.version>7.0.5</unboundid-ldapsdk.version>
