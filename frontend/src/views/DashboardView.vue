@@ -108,8 +108,7 @@ onMounted(() => {
 
 .welcome-card {
   background-color: #f0f9ff;
-  border: 1px solid var(--border-color);
-  border-left: 4px solid var(--brand-primary);
+  border: 1px solid var(--brand-primary);
   color: var(--text-primary);
   padding: 2.5rem;
   border-radius: var(--border-radius-lg);
