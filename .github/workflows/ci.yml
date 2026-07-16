@@ -67,7 +67,7 @@ jobs:
 
       # 7. WAR-Artefakt archivieren
       - name: Upload Build Artifact (WAR)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: maintenance-tool-war
           path: target/*.war
