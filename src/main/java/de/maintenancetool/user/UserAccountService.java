@@ -46,8 +46,8 @@ public class UserAccountService {
     if (principal
         instanceof
         org.springframework.security.saml2.provider.service.authentication
-                    .Saml2ResponseAssertionAccessor
-                saml2Accessor) {
+                .Saml2ResponseAssertionAccessor
+            saml2Accessor) {
       mail = getFirstSamlAttribute(saml2Accessor, "mail", "email");
       name = getFirstSamlAttribute(saml2Accessor, "cn", "displayName", "name");
     }
