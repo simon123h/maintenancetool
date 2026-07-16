@@ -1,6 +1,7 @@
 # Maintenance Tool
 
 [![Build Status](https://github.com/simon123h/schulungsplanung/actions/workflows/ci.yml/badge.svg)](https://github.com/simon123h/schulungsplanung/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/simon123h/maintenancetool/graph/badge.svg?token=DTAUZ6FJWK)](https://codecov.io/gh/simon123h/maintenancetool)
 
 Eine einfache, moderne Webanwendung zur Planung von Wartungsfenstern, Verwaltung von Applikationsbenutzern und automatisierten Benachrichtigungen per E-Mail.
 
