@@ -191,9 +191,9 @@ const insertVariable = (field: 'subjectPattern' | 'bodyPattern', token: string) 
       </div>
     </div>
 
-    <!-- Template Listing -->
-    <div v-else class="grid">
-      <div v-if="!templates || templates.length === 0" class="card empty-card">
+    <!-- Template Listing Table -->
+    <div v-else class="card list-card">
+      <div v-if="!templates || templates.length === 0" class="empty-card">
         <i class="mdi mdi-email-open-outline empty-icon"></i>
         <h3>Keine Vorlagen vorhanden</h3>
         <p>Erstellen Sie eine E-Mail-Vorlage, um Benachrichtigungen an Ihre Anwendungsnutzer senden zu können.</p>
@@ -202,31 +202,40 @@ const insertVariable = (field: 'subjectPattern' | 'bodyPattern', token: string) 
         </button>
       </div>
 
-      <div v-else v-for="temp in templates" :key="temp.id" class="card template-card">
-        <div class="template-header">
-          <div class="template-title-group">
-            <i class="mdi mdi-email-edit-outline template-icon"></i>
-            <h3>{{ temp.name }}</h3>
-          </div>
-          <div class="actions" v-if="canEdit">
-            <button @click="showEditForm(temp)" class="action-btn text-primary" title="Bearbeiten">
-              <i class="mdi mdi-pencil-outline"></i>
-            </button>
-            <button @click="deleteTemplate(temp.id!)" class="action-btn text-danger" title="Löschen">
-              <i class="mdi mdi-trash-can-outline"></i>
-            </button>
-          </div>
-        </div>
-        <div class="template-body">
-          <div class="preview-line">
-            <strong>Betreff:</strong>
-            <span class="preview-text text-muted">{{ temp.subjectPattern }}</span>
-          </div>
-          <div class="preview-block">
-            <strong>Inhalt:</strong>
-            <div class="body-preview">{{ temp.bodyPattern }}</div>
-          </div>
-        </div>
+      <div v-else class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Betreff-Muster</th>
+              <th>Inhalt-Muster (Vorschau)</th>
+              <th v-if="canEdit" class="text-right" style="width: 120px">Aktionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="temp in templates" :key="temp.id">
+              <td class="font-semibold">{{ temp.name }}</td>
+              <td>
+                <span class="pattern-badge">{{ temp.subjectPattern }}</span>
+              </td>
+              <td>
+                <span class="preview-text text-muted"
+                  >{{ temp.bodyPattern.substring(0, 80) }}{{ temp.bodyPattern.length > 80 ? '...' : '' }}</span
+                >
+              </td>
+              <td v-if="canEdit" class="text-right">
+                <div class="action-cell">
+                  <button @click="showEditForm(temp)" class="action-btn text-primary" title="Bearbeiten">
+                    <i class="mdi mdi-pencil-outline"></i>
+                  </button>
+                  <button @click="deleteTemplate(temp.id!)" class="action-btn text-danger" title="Löschen">
+                    <i class="mdi mdi-trash-can-outline"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -310,14 +319,12 @@ const insertVariable = (field: 'subjectPattern' | 'bodyPattern', token: string) 
   margin-top: 2rem;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 1.5rem;
+.list-card {
+  padding: 0;
+  overflow: hidden;
 }
 
 .empty-card {
-  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -332,65 +339,62 @@ const insertVariable = (field: 'subjectPattern' | 'bodyPattern', token: string) 
   margin-bottom: 1rem;
 }
 
-.template-card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+.table-container {
+  overflow-x: auto;
 }
 
-.template-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 1rem 1.5rem;
+  text-align: left;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
 }
 
-.template-title-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+.table th {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--bg-app);
 }
 
-.template-icon {
-  font-size: 1.5rem;
-  color: var(--brand-primary);
+.table tr:last-child td {
+  border-bottom: none;
 }
 
-.preview-line {
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
+.font-semibold {
+  font-weight: 600;
 }
 
-.preview-text {
-  margin-left: 0.5rem;
-  word-break: break-all;
-}
-
-.preview-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.9rem;
-}
-
-.body-preview {
+.pattern-badge {
   background-color: var(--bg-app);
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  padding: 0.75rem;
-  white-space: pre-wrap;
-  max-height: 150px;
-  overflow-y: auto;
+  padding: 0.25rem 0.5rem;
   font-size: 0.85rem;
-  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.preview-text {
+  font-size: 0.85rem;
+}
+
+.action-cell {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .action-btn {
   background: none;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 4px;
@@ -399,6 +403,10 @@ const insertVariable = (field: 'subjectPattern' | 'bodyPattern', token: string) 
 
 .action-btn:hover {
   background-color: var(--bg-app);
+}
+
+.text-right {
+  text-align: right !important;
 }
 
 @keyframes fadeIn {

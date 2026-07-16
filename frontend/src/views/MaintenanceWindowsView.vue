@@ -388,9 +388,9 @@ watch(
       </div>
     </div>
 
-    <!-- Windows Listing -->
-    <div v-else class="windows-container">
-      <div v-if="windows.length === 0" class="card empty-card">
+    <!-- Windows Listing Table -->
+    <div v-else class="card list-card">
+      <div v-if="windows.length === 0" class="empty-card">
         <i class="mdi mdi-calendar-clock empty-icon"></i>
         <h3>Keine Wartungsfenster geplant</h3>
         <p>Erstellen Sie ein neues Wartungsfenster, um mit der Koordination zu beginnen.</p>
@@ -399,69 +399,64 @@ watch(
         </button>
       </div>
 
-      <!-- Listing Grid -->
-      <div v-else class="windows-grid">
-        <div v-for="win in windows" :key="win.id" class="card window-card" :class="win.status.toLowerCase()">
-          <!-- Card Header details -->
-          <div class="window-card-header">
-            <div class="window-title-group">
-              <span class="app-badge">{{ win.applicationName }}</span>
-              <span class="status-badge" :class="win.status.toLowerCase()">{{ win.status }}</span>
-            </div>
-            <div class="actions" v-if="canEdit">
-              <button @click="showEditForm(win)" class="action-btn text-primary" title="Bearbeiten">
-                <i class="mdi mdi-pencil-outline"></i>
-              </button>
-              <button @click="deleteWindow(win.id!)" class="action-btn text-danger" title="Löschen">
-                <i class="mdi mdi-trash-can-outline"></i>
-              </button>
-            </div>
-          </div>
-
-          <div class="window-card-body">
-            <h3>{{ win.title }}</h3>
-            <p class="win-description" v-if="win.description">{{ win.description }}</p>
-
-            <div class="time-range">
-              <div class="time-point">
-                <i class="mdi mdi-play-circle-outline"></i>
-                <div>
-                  <span class="time-label">Start</span>
-                  <span class="time-value">{{ formatDateTime(win.startTime) }}</span>
+      <div v-else class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Applikation</th>
+              <th>Wartung & Details</th>
+              <th>Zeitraum</th>
+              <th>Status</th>
+              <th v-if="canEdit" class="text-right" style="width: 280px">Aktionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="win in windows" :key="win.id">
+              <td>
+                <span class="app-badge">{{ win.applicationName }}</span>
+              </td>
+              <td>
+                <div class="window-info-cell">
+                  <span class="font-semibold">{{ win.title }}</span>
+                  <span class="preview-text text-muted" v-if="win.description">{{ win.description }}</span>
+                  <span class="template-reference" v-if="win.templateName">
+                    <i class="mdi mdi-email-outline"></i> Vorlage: {{ win.templateName }}
+                  </span>
                 </div>
-              </div>
-              <div class="time-point">
-                <i class="mdi mdi-stop-circle-outline"></i>
-                <div>
-                  <span class="time-label">Ende</span>
-                  <span class="time-value">{{ formatDateTime(win.endTime) }}</span>
+              </td>
+              <td>
+                <div class="time-column-cell">
+                  <span class="time-text">{{ formatDateTime(win.startTime) }}</span>
+                  <span class="time-sep">bis</span>
+                  <span class="time-text">{{ formatDateTime(win.endTime) }}</span>
                 </div>
-              </div>
-            </div>
-
-            <!-- Email template reference -->
-            <div class="template-reference" v-if="win.templateName">
-              <i class="mdi mdi-email-outline"></i>
-              <span
-                >Vorlage: <strong>{{ win.templateName }}</strong></span
-              >
-            </div>
-          </div>
-
-          <!-- Bottom trigger actions -->
-          <div class="window-card-footer" v-if="canEdit">
-            <button
-              @click="notifyUsers(win.id!)"
-              class="btn btn-primary btn-block btn-notify"
-              :disabled="sendingNotifications[win.id!]"
-            >
-              <span v-if="sendingNotifications[win.id!]" class="spinner-btn">
-                <span class="spinner-icon"></span> E-Mails werden gesendet...
-              </span>
-              <span v-else> <i class="mdi mdi-send"></i> E-Mails an Benutzer senden </span>
-            </button>
-          </div>
-        </div>
+              </td>
+              <td>
+                <span class="status-badge" :class="win.status.toLowerCase()">{{ win.status }}</span>
+              </td>
+              <td v-if="canEdit" class="text-right">
+                <div class="action-cell window-action-cell">
+                  <button
+                    @click="notifyUsers(win.id!)"
+                    class="btn btn-primary btn-sm btn-notify-sm"
+                    :disabled="sendingNotifications[win.id!]"
+                  >
+                    <span v-if="sendingNotifications[win.id!]" class="spinner-btn">
+                      <span class="spinner-icon"></span>...
+                    </span>
+                    <span v-else> <i class="mdi mdi-send"></i> Senden </span>
+                  </button>
+                  <button @click="showEditForm(win)" class="action-btn text-primary" title="Bearbeiten">
+                    <i class="mdi mdi-pencil-outline"></i>
+                  </button>
+                  <button @click="deleteWindow(win.id!)" class="action-btn text-danger" title="Löschen">
+                    <i class="mdi mdi-trash-can-outline"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -544,52 +539,38 @@ watch(
   margin-bottom: 1rem;
 }
 
-/* Windows Grid layout */
-.windows-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 1.5rem;
+.list-card {
+  padding: 0;
+  overflow: hidden;
 }
 
-.window-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border-left: 4px solid var(--border-color);
-  transition: all 0.2s;
-  height: 100%;
+.table-container {
+  overflow-x: auto;
 }
 
-.window-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--box-shadow);
+.table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-/* Status colors borders */
-.window-card.planned {
-  border-left-color: var(--brand-primary);
-}
-.window-card.in_progress {
-  border-left-color: var(--color-warning, #f97316);
-}
-.window-card.completed {
-  border-left-color: var(--color-success, #22c55e);
-}
-.window-card.cancelled {
-  border-left-color: var(--text-muted);
+.table th,
+.table td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.window-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+.table th {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--bg-app);
 }
 
-.window-title-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.table tr:last-child td {
+  border-bottom: none;
 }
 
 .app-badge {
@@ -600,6 +581,7 @@ watch(
   font-weight: 600;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
+  display: inline-block;
 }
 
 .status-badge {
@@ -607,6 +589,7 @@ watch(
   font-weight: 700;
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
+  display: inline-block;
 }
 
 .status-badge.planned {
@@ -629,77 +612,58 @@ watch(
   color: #4b5563;
 }
 
-.window-card-body h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.25rem;
-}
-
-.win-description {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  margin-bottom: 1.25rem;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.time-range {
+.window-info-cell {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-  background-color: var(--bg-app);
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
+  gap: 0.25rem;
 }
 
-.time-point {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.time-point i {
-  font-size: 1.25rem;
-  color: var(--brand-primary);
-}
-
-.time-label {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
+.font-semibold {
   font-weight: 600;
 }
 
-.time-value {
-  font-size: 0.9rem;
-  font-weight: 500;
+.preview-text {
+  font-size: 0.85rem;
 }
 
 .template-reference {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
+  gap: 0.35rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
 }
 
-.window-card-footer {
-  margin-top: 1.5rem;
-  border-top: 1px solid var(--border-color);
-  padding-top: 1rem;
+.time-column-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.85rem;
 }
 
-.btn-notify {
-  width: 100%;
+.time-text {
+  font-weight: 500;
+}
+
+.time-sep {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.action-cell {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 0.5rem;
+}
+
+.window-action-cell {
+  align-items: center;
+}
+
+.btn-notify-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
 }
 
 .action-btn {
@@ -720,16 +684,20 @@ watch(
 .spinner-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .spinner-icon {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: white;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+}
+
+.text-right {
+  text-align: right !important;
 }
 
 @keyframes spin {

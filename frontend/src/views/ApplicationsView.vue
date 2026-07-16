@@ -27,6 +27,7 @@ const canEdit = ref(true);
 const isEditing = ref(false);
 const activeId = ref<string | null>(null);
 const userToMapId = ref<string>('');
+const showAssignModal = ref(false);
 
 const { form, reset: resetForm } = useForm<Application>({
   name: '',
@@ -167,6 +168,11 @@ const mapUser = async () => {
   }
 };
 
+const mapUserAndClose = async () => {
+  await mapUser();
+  showAssignModal.value = false;
+};
+
 // Unmap User
 const unmapUser = async (userId: string) => {
   if (!selectedApp.value) return;
@@ -262,37 +268,56 @@ const assignableUsers = computed(() => {
           </button>
         </div>
 
-        <div v-else class="apps-grid">
-          <div
-            v-for="app in applications"
-            :key="app.id"
-            class="card app-card"
-            :class="{ selected: selectedApp?.id === app.id }"
-            @click="selectApp(app)"
-          >
-            <div class="app-card-header">
-              <div class="app-icon-group">
-                <i class="mdi mdi-web app-icon"></i>
-                <div class="app-details">
-                  <h3>{{ app.name }}</h3>
-                  <a :href="app.url" target="_blank" class="app-url" @click.stop>
-                    {{ app.url }} <i class="mdi mdi-open-in-new" style="font-size: 0.8rem"></i>
-                  </a>
-                </div>
-              </div>
-              <div class="actions" v-if="canEdit">
-                <button @click="showEditForm(app, $event)" class="action-btn text-primary" title="Bearbeiten">
-                  <i class="mdi mdi-pencil-outline"></i>
-                </button>
-                <button @click="deleteApplication(app.id!, $event)" class="action-btn text-danger" title="Löschen">
-                  <i class="mdi mdi-trash-can-outline"></i>
-                </button>
-              </div>
-            </div>
-            <p class="app-description" v-if="app.description">{{ app.description }}</p>
-            <div class="card-footer">
-              <span class="click-to-inspect"> <i class="mdi mdi-account-group-outline"></i> Benutzer zuordnen </span>
-            </div>
+        <div v-else class="card list-card">
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>URL</th>
+                  <th v-if="!selectedApp">Beschreibung</th>
+                  <th v-if="canEdit" class="text-right" style="width: 120px">Aktionen</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="app in applications"
+                  :key="app.id"
+                  class="selectable-row"
+                  :class="{ 'selected-row': selectedApp?.id === app.id }"
+                  @click="selectApp(app)"
+                >
+                  <td>
+                    <div class="app-row-title">
+                      <i class="mdi mdi-web table-row-icon"></i>
+                      <span class="font-semibold">{{ app.name }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <a :href="app.url" target="_blank" class="app-url" @click.stop>
+                      {{ app.url }} <i class="mdi mdi-open-in-new" style="font-size: 0.8rem"></i>
+                    </a>
+                  </td>
+                  <td v-if="!selectedApp">
+                    <span class="preview-text text-muted">{{ app.description }}</span>
+                  </td>
+                  <td v-if="canEdit" class="text-right">
+                    <div class="action-cell">
+                      <button @click="showEditForm(app, $event)" class="action-btn text-primary" title="Bearbeiten">
+                        <i class="mdi mdi-pencil-outline"></i>
+                      </button>
+                      <button
+                        @click="deleteApplication(app.id!, $event)"
+                        class="action-btn text-danger"
+                        title="Löschen"
+                      >
+                        <i class="mdi mdi-trash-can-outline"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -311,21 +336,11 @@ const assignableUsers = computed(() => {
           </div>
 
           <div class="detail-body">
-            <!-- Mapping Form -->
-            <div v-if="canEdit" class="assign-form-group">
-              <label for="assignUser">Benutzer der App zuweisen</label>
-              <div class="assign-input-group">
-                <select id="assignUser" v-model="userToMapId" class="form-control">
-                  <option value="" disabled>Benutzer auswählen...</option>
-                  <option v-for="user in assignableUsers" :key="user.id" :value="user.id">
-                    {{ user.name }} ({{ user.email }})
-                  </option>
-                </select>
-                <button @click="mapUser" class="btn btn-primary" :disabled="!userToMapId">Zuweisen</button>
-              </div>
-              <p class="form-help-text" v-if="assignableUsers.length === 0">
-                Alle vorhandenen Endbenutzer sind dieser Anwendung bereits zugewiesen.
-              </p>
+            <!-- Add User Trigger Button -->
+            <div v-if="canEdit" class="assign-trigger-row">
+              <button @click="showAssignModal = true" class="btn btn-primary btn-sm btn-assign-trigger">
+                <i class="mdi mdi-account-plus-outline"></i> Benutzer zuordnen
+              </button>
             </div>
 
             <!-- Assigned Users list -->
@@ -356,6 +371,36 @@ const assignableUsers = computed(() => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Assignment Modal Dialog -->
+    <div v-if="showAssignModal" class="modal-overlay" @click.self="showAssignModal = false">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Benutzer zuweisen</h3>
+          <button @click="showAssignModal = false" class="btn-close-modal">
+            <i class="mdi mdi-close"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 0">
+            <label for="modalAssignUser">Wählen Sie einen Benutzer für "{{ selectedApp?.name }}"</label>
+            <select id="modalAssignUser" v-model="userToMapId" class="form-control">
+              <option value="" disabled>Bitte Benutzer auswählen...</option>
+              <option v-for="user in assignableUsers" :key="user.id" :value="user.id">
+                {{ user.name }} ({{ user.email }})
+              </option>
+            </select>
+            <p class="form-help-text" v-if="assignableUsers.length === 0">
+              Alle vorhandenen Endbenutzer sind dieser Anwendung bereits zugewiesen.
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button @click="showAssignModal = false" class="btn btn-secondary">Abbrechen</button>
+          <button @click="mapUserAndClose" class="btn btn-primary" :disabled="!userToMapId">Zuordnen</button>
         </div>
       </div>
     </div>
@@ -409,14 +454,9 @@ const assignableUsers = computed(() => {
   animation: slideIn 0.3s ease;
 }
 
-.apps-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
-}
-
-.apps-pane.collapsed .apps-grid {
-  grid-template-columns: 1fr;
+.list-card {
+  padding: 0;
+  overflow: hidden;
 }
 
 .empty-card {
@@ -434,52 +474,61 @@ const assignableUsers = computed(() => {
   margin-bottom: 1rem;
 }
 
-.app-card {
-  cursor: pointer;
-  border: 1px solid var(--border-color);
-  transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
+.table-container {
+  overflow-x: auto;
 }
 
-.app-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--brand-primary);
-  box-shadow: var(--box-shadow);
+.table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.app-card.selected {
-  border-color: var(--brand-primary);
-  background-color: var(--brand-primary-light, #f0f9ff);
-  box-shadow: 0 0 0 1px var(--brand-primary);
+.table th,
+.table td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.app-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.app-icon-group {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.app-icon {
-  font-size: 1.75rem;
-  color: var(--brand-primary);
+.table th {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   background-color: var(--bg-app);
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
 }
 
-.app-details h3 {
-  margin: 0;
-  font-size: 1.1rem;
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.selectable-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.selectable-row:hover {
+  background-color: var(--bg-app);
+}
+
+.selected-row {
+  background-color: var(--brand-primary-light, #e0f2fe) !important;
+}
+
+.app-row-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.table-row-icon {
+  font-size: 1.25rem;
+  color: var(--brand-primary);
+}
+
+.font-semibold {
+  font-weight: 600;
 }
 
 .app-url {
@@ -488,32 +537,24 @@ const assignableUsers = computed(() => {
   text-decoration: none;
   word-break: break-all;
   display: inline-block;
-  margin-top: 0.25rem;
 }
 
 .app-url:hover {
   color: var(--brand-primary);
 }
 
-.app-description {
-  font-size: 0.9rem;
-  color: var(--text-muted);
+.preview-text {
+  font-size: 0.85rem;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: 1.5rem;
 }
 
-.card-footer {
-  border-top: 1px solid var(--border-color);
-  padding-top: 0.75rem;
-  font-size: 0.85rem;
-  color: var(--brand-primary);
-  font-weight: 500;
+.action-cell {
   display: flex;
-  align-items: center;
-  gap: 0.25rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .action-btn {
@@ -527,7 +568,7 @@ const assignableUsers = computed(() => {
 }
 
 .action-btn:hover {
-  background-color: var(--bg-app);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Detail Panel card styles */
@@ -697,5 +738,87 @@ const assignableUsers = computed(() => {
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+.assign-trigger-row {
+  margin-bottom: 1.5rem;
+}
+
+.btn-assign-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.25s ease;
+}
+
+.modal-dialog {
+  background: var(--bg-card);
+  border-radius: var(--border-radius-lg);
+  width: 500px;
+  max-width: 90%;
+  box-shadow: var(--box-shadow-lg);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.btn-close-modal {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-close-modal:hover {
+  background-color: var(--bg-app);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-app);
 }
 </style>
