@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- ChangeSet 2: Erstellen der Tabellen für Applikationen, Benutzer, Templates und Wartungsfenster -->
+    <changeSet id="002-maintenance-entities" author="simon">
+        
+        <!-- 1. Tabelle: application -->
+        <createTable tableName="application">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_application"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uc_application_name"/>
+            </column>
+            <column name="url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(1000)"/>
+        </createTable>
+
+        <!-- 2. Tabelle: application_user -->
+        <createTable tableName="application_user">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_application_user"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uc_app_user_email"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- 3. Join-Tabelle: application_user_mapping (Many-to-Many) -->
+        <createTable tableName="application_user_mapping">
+            <column name="application_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="application_user_mapping" columnNames="application_id, user_id" constraintName="pk_app_user_mapping"/>
+        <addForeignKeyConstraint baseTableName="application_user_mapping" baseColumnNames="application_id"
+                                 referencedTableName="application" referencedColumnNames="id"
+                                 constraintName="fk_mapping_to_application" onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="application_user_mapping" baseColumnNames="user_id"
+                                 referencedTableName="application_user" referencedColumnNames="id"
+                                 constraintName="fk_mapping_to_user" onDelete="CASCADE"/>
+
+        <!-- 4. Tabelle: email_template -->
+        <createTable tableName="email_template">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_email_template"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uc_email_template_name"/>
+            </column>
+            <column name="subject_pattern" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="body_pattern" type="CLOB">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- 5. Tabelle: maintenance_window -->
+        <createTable tableName="maintenance_window">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_maintenance_window"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(1000)"/>
+            <column name="start_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="application_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="template_id" type="UUID"/>
+            <column name="overridden_subject" type="VARCHAR(255)"/>
+            <column name="overridden_body" type="CLOB"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="maintenance_window" baseColumnNames="application_id"
+                                 referencedTableName="application" referencedColumnNames="id"
+                                 constraintName="fk_maintenance_to_application" onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="maintenance_window" baseColumnNames="template_id"
+                                 referencedTableName="email_template" referencedColumnNames="id"
+                                 constraintName="fk_maintenance_to_template" onDelete="SET NULL"/>
+
+    </changeSet>
+</databaseChangeLog>
