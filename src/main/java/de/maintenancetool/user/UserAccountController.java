@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
+@PreAuthorize("isAuthenticated()")
 public class UserAccountController {
 
   private final UserAccountService userAccountService;
@@ -29,7 +30,6 @@ public class UserAccountController {
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
   public List<UserAccountDto> getAllUsers() {
     return userAccountService.getAllUsers().stream()
         .map(UserAccountDto::fromEntity)
@@ -37,7 +37,6 @@ public class UserAccountController {
   }
 
   @PutMapping("/{id}/roles")
-  @PreAuthorize("hasRole('ADMIN')")
   public UserAccountDto updateUserRoles(@PathVariable UUID id, @RequestBody Set<Rolle> roles) {
     return UserAccountDto.fromEntity(userAccountService.updateUserRoles(id, roles));
   }

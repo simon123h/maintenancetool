@@ -56,9 +56,8 @@ public class SecurityConfig {
                       // H2-Konsole freigeben für die Entwicklung
                       .requestMatchers("/h2-console/**")
                       .permitAll()
-                      // Statische Assets & integrierte Vitepress-Hilfeseite freigeben
-                      .requestMatchers(
-                          "/help", "/help/**", "/assets/**", "/favicon.ico", "/api/config/branding")
+                      // Statische Assets freigeben
+                      .requestMatchers("/assets/**", "/favicon.ico")
                       .permitAll()
                       // Alles andere erfordert eine Anmeldung
                       .anyRequest()
@@ -118,9 +117,8 @@ public class SecurityConfig {
       http.authorizeHttpRequests(
               auth ->
                   auth
-                      // Statische Assets & integrierte Hilfeseite freigeben
-                      .requestMatchers(
-                          "/help", "/help/**", "/assets/**", "/favicon.ico", "/api/config/branding")
+                      // Statische Assets freigeben
+                      .requestMatchers("/assets/**", "/favicon.ico")
                       .permitAll()
                       .anyRequest()
                       .authenticated())

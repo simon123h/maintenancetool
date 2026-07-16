@@ -10,31 +10,28 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/maintenance-windows")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class MaintenanceWindowController {
 
   private final MaintenanceWindowService maintenanceWindowService;
 
   @GetMapping
-  @PreAuthorize("isAuthenticated()")
   public List<MaintenanceWindowDto> getAllWindows() {
     return maintenanceWindowService.getAllWindows();
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("isAuthenticated()")
   public MaintenanceWindowDto getWindowById(@PathVariable UUID id) {
     return maintenanceWindowService.getWindowById(id);
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
   public MaintenanceWindowDto createWindow(@RequestBody MaintenanceWindowDto dto) {
     return maintenanceWindowService.createWindow(dto);
   }
 
   @PutMapping("/{id}")
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
   public MaintenanceWindowDto updateWindow(
       @PathVariable UUID id, @RequestBody MaintenanceWindowDto dto) {
     return maintenanceWindowService.updateWindow(id, dto);
@@ -42,14 +39,12 @@ public class MaintenanceWindowController {
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
   public void deleteWindow(@PathVariable UUID id) {
     maintenanceWindowService.deleteWindow(id);
   }
 
   @PostMapping("/{id}/notify")
   @ResponseStatus(HttpStatus.ACCEPTED)
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
   public void sendNotifications(@PathVariable UUID id) {
     maintenanceWindowService.sendNotifications(id);
   }
