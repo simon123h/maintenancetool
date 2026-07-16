@@ -64,7 +64,7 @@ jobs:
 
       # 6. GitHub Release erstellen und das WAR-Artefakt hochladen
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             target/maintenance-tool-v*.war
