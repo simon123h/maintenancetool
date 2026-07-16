@@ -47,8 +47,8 @@ public class UserAccount {
    *
    * @param neueRollen die neue Menge an Rollen
    * @param activeAdminCount die Gesamtzahl der aktiven Administratoren in der Datenbank
-   * @throws de.maintenancetool.error.InvalidOperationException wenn die letzte Admin-Rolle
-   *     entzogen werden soll
+   * @throws de.maintenancetool.error.InvalidOperationException wenn die letzte Admin-Rolle entzogen
+   *     werden soll
    */
   public void assignRoles(Set<Rolle> neueRollen, long activeAdminCount) {
     if (!neueRollen.contains(Rolle.ROLE_ADMIN) && this.rollen.contains(Rolle.ROLE_ADMIN)) {

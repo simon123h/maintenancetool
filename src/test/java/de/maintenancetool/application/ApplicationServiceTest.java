@@ -18,14 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ApplicationServiceTest {
 
-  @Mock
-  private ApplicationRepository applicationRepository;
+  @Mock private ApplicationRepository applicationRepository;
 
-  @Mock
-  private ApplicationUserRepository applicationUserRepository;
+  @Mock private ApplicationUserRepository applicationUserRepository;
 
-  @InjectMocks
-  private ApplicationService applicationService;
+  @InjectMocks private ApplicationService applicationService;
 
   private Application app;
   private ApplicationDto appDto;
@@ -33,25 +30,28 @@ class ApplicationServiceTest {
 
   @BeforeEach
   void setUp() {
-    app = Application.builder()
-        .id(UUID.randomUUID())
-        .name("TestApp")
-        .url("http://test.com")
-        .description("Test Description")
-        .users(new HashSet<>())
-        .build();
+    app =
+        Application.builder()
+            .id(UUID.randomUUID())
+            .name("TestApp")
+            .url("http://test.com")
+            .description("Test Description")
+            .users(new HashSet<>())
+            .build();
 
-    appDto = ApplicationDto.builder()
-        .name("TestApp")
-        .url("http://test.com")
-        .description("Test Description")
-        .build();
+    appDto =
+        ApplicationDto.builder()
+            .name("TestApp")
+            .url("http://test.com")
+            .description("Test Description")
+            .build();
 
-    user = ApplicationUser.builder()
-        .id(UUID.randomUUID())
-        .email("user@test.com")
-        .name("Test User")
-        .build();
+    user =
+        ApplicationUser.builder()
+            .id(UUID.randomUUID())
+            .email("user@test.com")
+            .name("Test User")
+            .build();
   }
 
   @Test
@@ -74,7 +74,8 @@ class ApplicationServiceTest {
   void testGetApplicationById_NotFound() {
     UUID randomId = UUID.randomUUID();
     when(applicationRepository.findById(randomId)).thenReturn(Optional.empty());
-    assertThrows(ResourceNotFoundException.class, () -> applicationService.getApplicationById(randomId));
+    assertThrows(
+        ResourceNotFoundException.class, () -> applicationService.getApplicationById(randomId));
   }
 
   @Test
@@ -90,7 +91,8 @@ class ApplicationServiceTest {
   @Test
   void testCreateApplication_AlreadyExists() {
     when(applicationRepository.findByName("TestApp")).thenReturn(Optional.of(app));
-    assertThrows(InvalidOperationException.class, () -> applicationService.createApplication(appDto));
+    assertThrows(
+        InvalidOperationException.class, () -> applicationService.createApplication(appDto));
   }
 
   @Test

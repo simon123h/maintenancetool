@@ -28,7 +28,8 @@ class EmailServiceTest {
   void testSendMail_Success() {
     emailService.sendMail("test@example.com", "Test Subject", "Test Body");
 
-    ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+    ArgumentCaptor<SimpleMailMessage> messageCaptor =
+        ArgumentCaptor.forClass(SimpleMailMessage.class);
     verify(mailSender, times(1)).send(messageCaptor.capture());
 
     SimpleMailMessage sentMessage = messageCaptor.getValue();

@@ -24,8 +24,11 @@ public class EmailTemplateService {
 
   @Transactional(readOnly = true)
   public EmailTemplateDto getTemplateById(UUID id) {
-    EmailTemplate temp = emailTemplateRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Email template not found with id: " + id));
+    EmailTemplate temp =
+        emailTemplateRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Email template not found with id: " + id));
     return convertToDto(temp);
   }
 
@@ -34,26 +37,33 @@ public class EmailTemplateService {
     if (emailTemplateRepository.findByName(dto.getName()).isPresent()) {
       throw new InvalidOperationException("Email template name already exists: " + dto.getName());
     }
-    EmailTemplate temp = EmailTemplate.builder()
-        .name(dto.getName())
-        .subjectPattern(dto.getSubjectPattern())
-        .bodyPattern(dto.getBodyPattern())
-        .build();
+    EmailTemplate temp =
+        EmailTemplate.builder()
+            .name(dto.getName())
+            .subjectPattern(dto.getSubjectPattern())
+            .bodyPattern(dto.getBodyPattern())
+            .build();
     EmailTemplate saved = emailTemplateRepository.save(temp);
     return convertToDto(saved);
   }
 
   @Transactional
   public EmailTemplateDto updateTemplate(UUID id, EmailTemplateDto dto) {
-    EmailTemplate temp = emailTemplateRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Email template not found with id: " + id));
+    EmailTemplate temp =
+        emailTemplateRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Email template not found with id: " + id));
 
-    emailTemplateRepository.findByName(dto.getName())
-        .ifPresent(existing -> {
-          if (!existing.getId().equals(id)) {
-            throw new InvalidOperationException("Email template name already exists: " + dto.getName());
-          }
-        });
+    emailTemplateRepository
+        .findByName(dto.getName())
+        .ifPresent(
+            existing -> {
+              if (!existing.getId().equals(id)) {
+                throw new InvalidOperationException(
+                    "Email template name already exists: " + dto.getName());
+              }
+            });
 
     temp.setName(dto.getName());
     temp.setSubjectPattern(dto.getSubjectPattern());

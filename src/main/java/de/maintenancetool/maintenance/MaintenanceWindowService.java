@@ -35,8 +35,11 @@ public class MaintenanceWindowService {
 
   @Transactional(readOnly = true)
   public MaintenanceWindowDto getWindowById(UUID id) {
-    MaintenanceWindow window = maintenanceWindowRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Maintenance window not found with id: " + id));
+    MaintenanceWindow window =
+        maintenanceWindowRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Maintenance window not found with id: " + id));
     return convertToDto(window);
   }
 
@@ -46,26 +49,37 @@ public class MaintenanceWindowService {
       throw new InvalidOperationException("Start time must be before end time");
     }
 
-    Application app = applicationRepository.findById(dto.getApplicationId())
-        .orElseThrow(() -> new ResourceNotFoundException("Application not found with id: " + dto.getApplicationId()));
+    Application app =
+        applicationRepository
+            .findById(dto.getApplicationId())
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        "Application not found with id: " + dto.getApplicationId()));
 
     EmailTemplate template = null;
     if (dto.getTemplateId() != null) {
-      template = emailTemplateRepository.findById(dto.getTemplateId())
-          .orElseThrow(() -> new ResourceNotFoundException("Email template not found with id: " + dto.getTemplateId()));
+      template =
+          emailTemplateRepository
+              .findById(dto.getTemplateId())
+              .orElseThrow(
+                  () ->
+                      new ResourceNotFoundException(
+                          "Email template not found with id: " + dto.getTemplateId()));
     }
 
-    MaintenanceWindow window = MaintenanceWindow.builder()
-        .title(dto.getTitle())
-        .description(dto.getDescription())
-        .startTime(dto.getStartTime())
-        .endTime(dto.getEndTime())
-        .status(dto.getStatus() != null ? dto.getStatus() : MaintenanceStatus.PLANNED)
-        .application(app)
-        .template(template)
-        .overriddenSubject(dto.getOverriddenSubject())
-        .overriddenBody(dto.getOverriddenBody())
-        .build();
+    MaintenanceWindow window =
+        MaintenanceWindow.builder()
+            .title(dto.getTitle())
+            .description(dto.getDescription())
+            .startTime(dto.getStartTime())
+            .endTime(dto.getEndTime())
+            .status(dto.getStatus() != null ? dto.getStatus() : MaintenanceStatus.PLANNED)
+            .application(app)
+            .template(template)
+            .overriddenSubject(dto.getOverriddenSubject())
+            .overriddenBody(dto.getOverriddenBody())
+            .build();
 
     MaintenanceWindow saved = maintenanceWindowRepository.save(window);
     return convertToDto(saved);
@@ -77,16 +91,29 @@ public class MaintenanceWindowService {
       throw new InvalidOperationException("Start time must be before end time");
     }
 
-    MaintenanceWindow window = maintenanceWindowRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Maintenance window not found with id: " + id));
+    MaintenanceWindow window =
+        maintenanceWindowRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Maintenance window not found with id: " + id));
 
-    Application app = applicationRepository.findById(dto.getApplicationId())
-        .orElseThrow(() -> new ResourceNotFoundException("Application not found with id: " + dto.getApplicationId()));
+    Application app =
+        applicationRepository
+            .findById(dto.getApplicationId())
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        "Application not found with id: " + dto.getApplicationId()));
 
     EmailTemplate template = null;
     if (dto.getTemplateId() != null) {
-      template = emailTemplateRepository.findById(dto.getTemplateId())
-          .orElseThrow(() -> new ResourceNotFoundException("Email template not found with id: " + dto.getTemplateId()));
+      template =
+          emailTemplateRepository
+              .findById(dto.getTemplateId())
+              .orElseThrow(
+                  () ->
+                      new ResourceNotFoundException(
+                          "Email template not found with id: " + dto.getTemplateId()));
     }
 
     window.setTitle(dto.getTitle());
@@ -113,8 +140,11 @@ public class MaintenanceWindowService {
 
   @Transactional(readOnly = true)
   public void sendNotifications(UUID id) {
-    MaintenanceWindow window = maintenanceWindowRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Maintenance window not found with id: " + id));
+    MaintenanceWindow window =
+        maintenanceWindowRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Maintenance window not found with id: " + id));
 
     Application app = window.getApplication();
     if (app.getUsers().isEmpty()) {
@@ -139,10 +169,11 @@ public class MaintenanceWindowService {
     } else if (window.getTemplate() != null) {
       bodyPattern = window.getTemplate().getBodyPattern();
     } else {
-      bodyPattern = "Hallo {userName},\n\nfür die Anwendung {appName} ist ein Wartungsfenster geplant:\n" +
-                    "Start: {startTime}\n" +
-                    "Ende: {endTime}\n\n" +
-                    "Details: {description}";
+      bodyPattern =
+          "Hallo {userName},\n\nfür die Anwendung {appName} ist ein Wartungsfenster geplant:\n"
+              + "Start: {startTime}\n"
+              + "Ende: {endTime}\n\n"
+              + "Details: {description}";
     }
 
     for (ApplicationUser user : app.getUsers()) {
@@ -150,13 +181,15 @@ public class MaintenanceWindowService {
       String body = substituteVariables(bodyPattern, user, window);
       emailService.sendMail(user.getEmail(), subject, body);
     }
-    log.info("Triggered {} notification emails for maintenance window {}", app.getUsers().size(), window.getTitle());
+    log.info(
+        "Triggered {} notification emails for maintenance window {}",
+        app.getUsers().size(),
+        window.getTitle());
   }
 
   private String substituteVariables(String text, ApplicationUser user, MaintenanceWindow window) {
     if (text == null) return "";
-    return text
-        .replace("{userName}", user.getName())
+    return text.replace("{userName}", user.getName())
         .replace("{userEmail}", user.getEmail())
         .replace("{appName}", window.getApplication().getName())
         .replace("{appUrl}", window.getApplication().getUrl())

@@ -35,7 +35,8 @@ public class MaintenanceWindowController {
 
   @PutMapping("/{id}")
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
-  public MaintenanceWindowDto updateWindow(@PathVariable UUID id, @RequestBody MaintenanceWindowDto dto) {
+  public MaintenanceWindowDto updateWindow(
+      @PathVariable UUID id, @RequestBody MaintenanceWindowDto dto) {
     return maintenanceWindowService.updateWindow(id, dto);
   }
 

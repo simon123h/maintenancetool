@@ -24,35 +24,43 @@ public class ApplicationUserService {
 
   @Transactional(readOnly = true)
   public ApplicationUserDto getUserById(UUID id) {
-    ApplicationUser user = applicationUserRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Application user not found with id: " + id));
+    ApplicationUser user =
+        applicationUserRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Application user not found with id: " + id));
     return convertToDto(user);
   }
 
   @Transactional
   public ApplicationUserDto createUser(ApplicationUserDto dto) {
     if (applicationUserRepository.findByEmail(dto.getEmail()).isPresent()) {
-      throw new InvalidOperationException("Application user with email already exists: " + dto.getEmail());
+      throw new InvalidOperationException(
+          "Application user with email already exists: " + dto.getEmail());
     }
-    ApplicationUser user = ApplicationUser.builder()
-        .email(dto.getEmail())
-        .name(dto.getName())
-        .build();
+    ApplicationUser user =
+        ApplicationUser.builder().email(dto.getEmail()).name(dto.getName()).build();
     ApplicationUser saved = applicationUserRepository.save(user);
     return convertToDto(saved);
   }
 
   @Transactional
   public ApplicationUserDto updateUser(UUID id, ApplicationUserDto dto) {
-    ApplicationUser user = applicationUserRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Application user not found with id: " + id));
+    ApplicationUser user =
+        applicationUserRepository
+            .findById(id)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Application user not found with id: " + id));
 
-    applicationUserRepository.findByEmail(dto.getEmail())
-        .ifPresent(existing -> {
-          if (!existing.getId().equals(id)) {
-            throw new InvalidOperationException("Application user with email already exists: " + dto.getEmail());
-          }
-        });
+    applicationUserRepository
+        .findByEmail(dto.getEmail())
+        .ifPresent(
+            existing -> {
+              if (!existing.getId().equals(id)) {
+                throw new InvalidOperationException(
+                    "Application user with email already exists: " + dto.getEmail());
+              }
+            });
 
     user.setEmail(dto.getEmail());
     user.setName(dto.getName());

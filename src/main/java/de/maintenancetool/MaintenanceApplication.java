@@ -7,8 +7,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Hauptklasse der Maintenance-Tool-Anwendung. Erbt von {@link SpringBootServletInitializer}, um
- * das Packen und Ausführen als traditionelle WAR-Datei zu unterstützen.
+ * Hauptklasse der Maintenance-Tool-Anwendung. Erbt von {@link SpringBootServletInitializer}, um das
+ * Packen und Ausführen als traditionelle WAR-Datei zu unterstützen.
  */
 @SpringBootApplication
 @EnableScheduling

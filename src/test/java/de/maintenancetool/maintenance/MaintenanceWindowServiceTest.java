@@ -22,20 +22,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class MaintenanceWindowServiceTest {
 
-  @Mock
-  private MaintenanceWindowRepository maintenanceWindowRepository;
+  @Mock private MaintenanceWindowRepository maintenanceWindowRepository;
 
-  @Mock
-  private ApplicationRepository applicationRepository;
+  @Mock private ApplicationRepository applicationRepository;
 
-  @Mock
-  private EmailTemplateRepository emailTemplateRepository;
+  @Mock private EmailTemplateRepository emailTemplateRepository;
 
-  @Mock
-  private EmailService emailService;
+  @Mock private EmailService emailService;
 
-  @InjectMocks
-  private MaintenanceWindowService maintenanceWindowService;
+  @InjectMocks private MaintenanceWindowService maintenanceWindowService;
 
   private Application app;
   private EmailTemplate template;
@@ -45,46 +40,51 @@ class MaintenanceWindowServiceTest {
 
   @BeforeEach
   void setUp() {
-    app = Application.builder()
-        .id(UUID.randomUUID())
-        .name("AppOne")
-        .url("http://appone.com")
-        .users(new HashSet<>())
-        .build();
+    app =
+        Application.builder()
+            .id(UUID.randomUUID())
+            .name("AppOne")
+            .url("http://appone.com")
+            .users(new HashSet<>())
+            .build();
 
-    user = ApplicationUser.builder()
-        .id(UUID.randomUUID())
-        .email("recipient@company.com")
-        .name("Bob User")
-        .build();
+    user =
+        ApplicationUser.builder()
+            .id(UUID.randomUUID())
+            .email("recipient@company.com")
+            .name("Bob User")
+            .build();
 
-    template = EmailTemplate.builder()
-        .id(UUID.randomUUID())
-        .name("DefaultTemp")
-        .subjectPattern("Maintenance for {appName}")
-        .bodyPattern("Hi {userName}, {appName} will be down at {startTime} until {endTime}.")
-        .build();
+    template =
+        EmailTemplate.builder()
+            .id(UUID.randomUUID())
+            .name("DefaultTemp")
+            .subjectPattern("Maintenance for {appName}")
+            .bodyPattern("Hi {userName}, {appName} will be down at {startTime} until {endTime}.")
+            .build();
 
-    window = MaintenanceWindow.builder()
-        .id(UUID.randomUUID())
-        .title("Database Upgrade")
-        .description("Upgrading SQL Server")
-        .startTime(LocalDateTime.of(2026, 7, 20, 10, 0))
-        .endTime(LocalDateTime.of(2026, 7, 20, 12, 0))
-        .status(MaintenanceStatus.PLANNED)
-        .application(app)
-        .template(template)
-        .build();
+    window =
+        MaintenanceWindow.builder()
+            .id(UUID.randomUUID())
+            .title("Database Upgrade")
+            .description("Upgrading SQL Server")
+            .startTime(LocalDateTime.of(2026, 7, 20, 10, 0))
+            .endTime(LocalDateTime.of(2026, 7, 20, 12, 0))
+            .status(MaintenanceStatus.PLANNED)
+            .application(app)
+            .template(template)
+            .build();
 
-    windowDto = MaintenanceWindowDto.builder()
-        .title("Database Upgrade")
-        .description("Upgrading SQL Server")
-        .startTime(LocalDateTime.of(2026, 7, 20, 10, 0))
-        .endTime(LocalDateTime.of(2026, 7, 20, 12, 0))
-        .status(MaintenanceStatus.PLANNED)
-        .applicationId(app.getId())
-        .templateId(template.getId())
-        .build();
+    windowDto =
+        MaintenanceWindowDto.builder()
+            .title("Database Upgrade")
+            .description("Upgrading SQL Server")
+            .startTime(LocalDateTime.of(2026, 7, 20, 10, 0))
+            .endTime(LocalDateTime.of(2026, 7, 20, 12, 0))
+            .status(MaintenanceStatus.PLANNED)
+            .applicationId(app.getId())
+            .templateId(template.getId())
+            .build();
   }
 
   @Test
@@ -105,7 +105,8 @@ class MaintenanceWindowServiceTest {
     windowDto.setStartTime(LocalDateTime.now().plusDays(2));
     windowDto.setEndTime(LocalDateTime.now().plusDays(1)); // end before start
 
-    assertThrows(InvalidOperationException.class, () -> maintenanceWindowService.createWindow(windowDto));
+    assertThrows(
+        InvalidOperationException.class, () -> maintenanceWindowService.createWindow(windowDto));
   }
 
   @Test
@@ -118,7 +119,8 @@ class MaintenanceWindowServiceTest {
 
     // Verify template rendering and mail delivery
     String expectedSubject = "Maintenance for AppOne";
-    String expectedBody = "Hi Bob User, AppOne will be down at 2026-07-20T10:00 until 2026-07-20T12:00.";
+    String expectedBody =
+        "Hi Bob User, AppOne will be down at 2026-07-20T10:00 until 2026-07-20T12:00.";
     verify(emailService, times(1)).sendMail(user.getEmail(), expectedSubject, expectedBody);
   }
 
