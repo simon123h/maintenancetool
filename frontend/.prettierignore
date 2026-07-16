@@ -1,0 +1,9 @@
+node_modules
+dist
+.vitepress
+help/.vitepress/dist
+help/.vitepress/cache
+node
+target
+package-lock.json
+package.json
