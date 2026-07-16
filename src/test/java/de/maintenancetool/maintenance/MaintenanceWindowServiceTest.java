@@ -68,8 +68,8 @@ class MaintenanceWindowServiceTest {
             .id(UUID.randomUUID())
             .title("Database Upgrade")
             .description("Upgrading SQL Server")
-            .startTime(LocalDateTime.of(2026, 7, 20, 10, 0))
-            .endTime(LocalDateTime.of(2026, 7, 20, 12, 0))
+            .startTime(LocalDateTime.now().plusDays(20))
+            .endTime(LocalDateTime.now().plusDays(20).plusHours(2))
             .status(MaintenanceStatus.PLANNED)
             .application(app)
             .template(template)
@@ -79,8 +79,8 @@ class MaintenanceWindowServiceTest {
         MaintenanceWindowDto.builder()
             .title("Database Upgrade")
             .description("Upgrading SQL Server")
-            .startTime(LocalDateTime.of(2026, 7, 20, 10, 0))
-            .endTime(LocalDateTime.of(2026, 7, 20, 12, 0))
+            .startTime(LocalDateTime.now().plusDays(20))
+            .endTime(LocalDateTime.now().plusDays(20).plusHours(2))
             .status(MaintenanceStatus.PLANNED)
             .applicationId(app.getId())
             .templateId(template.getId())
@@ -112,6 +112,8 @@ class MaintenanceWindowServiceTest {
   @Test
   void testSendNotifications_Success() {
     app.getUsers().add(user);
+    window.setStartTime(LocalDateTime.of(2026, 7, 20, 10, 0));
+    window.setEndTime(LocalDateTime.of(2026, 7, 20, 12, 0));
 
     when(maintenanceWindowRepository.findById(window.getId())).thenReturn(Optional.of(window));
 
@@ -137,5 +139,120 @@ class MaintenanceWindowServiceTest {
     String expectedSubject = "Override Subject Database Upgrade";
     String expectedBody = "Override Body for Bob User";
     verify(emailService, times(1)).sendMail(user.getEmail(), expectedSubject, expectedBody);
+    assertTrue(window.getEmailsSent());
+    verify(maintenanceWindowRepository, times(1)).save(window);
+  }
+
+  @Test
+  void testCheckAndSendImmediateNotification_TriggersSend() {
+    app.getUsers().add(user);
+    MaintenanceWindow immediateWindow =
+        MaintenanceWindow.builder()
+            .id(UUID.randomUUID())
+            .title("Immediate Maintenance")
+            .startTime(LocalDateTime.now().plusDays(5))
+            .endTime(LocalDateTime.now().plusDays(6))
+            .status(MaintenanceStatus.PLANNED)
+            .application(app)
+            .template(template)
+            .notificationLeadTimeDays(7)
+            .emailsSent(false)
+            .build();
+
+    when(applicationRepository.findById(app.getId())).thenReturn(Optional.of(app));
+    when(emailTemplateRepository.findById(template.getId())).thenReturn(Optional.of(template));
+    when(maintenanceWindowRepository.save(any(MaintenanceWindow.class)))
+        .thenReturn(immediateWindow);
+
+    MaintenanceWindowDto result =
+        maintenanceWindowService.createWindow(
+            MaintenanceWindowDto.builder()
+                .title("Immediate Maintenance")
+                .startTime(LocalDateTime.now().plusDays(5))
+                .endTime(LocalDateTime.now().plusDays(6))
+                .status(MaintenanceStatus.PLANNED)
+                .applicationId(app.getId())
+                .templateId(template.getId())
+                .notificationLeadTimeDays(7)
+                .build());
+
+    assertTrue(result.getEmailsSent());
+    verify(emailService, times(1)).sendMail(eq(user.getEmail()), anyString(), anyString());
+  }
+
+  @Test
+  void testCheckAndSendImmediateNotification_NoTrigger() {
+    app.getUsers().add(user);
+    MaintenanceWindow farFutureWindow =
+        MaintenanceWindow.builder()
+            .id(UUID.randomUUID())
+            .title("Far Future Maintenance")
+            .startTime(LocalDateTime.now().plusDays(10))
+            .endTime(LocalDateTime.now().plusDays(11))
+            .status(MaintenanceStatus.PLANNED)
+            .application(app)
+            .template(template)
+            .notificationLeadTimeDays(7)
+            .emailsSent(false)
+            .build();
+
+    when(applicationRepository.findById(app.getId())).thenReturn(Optional.of(app));
+    when(emailTemplateRepository.findById(template.getId())).thenReturn(Optional.of(template));
+    when(maintenanceWindowRepository.save(any(MaintenanceWindow.class)))
+        .thenReturn(farFutureWindow);
+
+    MaintenanceWindowDto result =
+        maintenanceWindowService.createWindow(
+            MaintenanceWindowDto.builder()
+                .title("Far Future Maintenance")
+                .startTime(LocalDateTime.now().plusDays(10))
+                .endTime(LocalDateTime.now().plusDays(11))
+                .status(MaintenanceStatus.PLANNED)
+                .applicationId(app.getId())
+                .templateId(template.getId())
+                .notificationLeadTimeDays(7)
+                .build());
+
+    assertFalse(result.getEmailsSent());
+    verify(emailService, never()).sendMail(anyString(), anyString(), anyString());
+  }
+
+  @Test
+  void testCheckAndSendScheduledNotifications() {
+    app.getUsers().add(user);
+    MaintenanceWindow winToNotify =
+        MaintenanceWindow.builder()
+            .id(UUID.randomUUID())
+            .title("Due Window")
+            .startTime(LocalDateTime.now().plusDays(3))
+            .endTime(LocalDateTime.now().plusDays(4))
+            .status(MaintenanceStatus.PLANNED)
+            .application(app)
+            .template(template)
+            .notificationLeadTimeDays(7)
+            .emailsSent(false)
+            .build();
+
+    MaintenanceWindow winNotDue =
+        MaintenanceWindow.builder()
+            .id(UUID.randomUUID())
+            .title("Future Window")
+            .startTime(LocalDateTime.now().plusDays(10))
+            .endTime(LocalDateTime.now().plusDays(11))
+            .status(MaintenanceStatus.PLANNED)
+            .application(app)
+            .template(template)
+            .notificationLeadTimeDays(7)
+            .emailsSent(false)
+            .build();
+
+    when(maintenanceWindowRepository.findByEmailsSentFalse())
+        .thenReturn(Arrays.asList(winToNotify, winNotDue));
+
+    maintenanceWindowService.checkAndSendScheduledNotifications();
+
+    assertTrue(winToNotify.getEmailsSent());
+    assertFalse(winNotDue.getEmailsSent());
+    verify(emailService, times(1)).sendMail(eq(user.getEmail()), anyString(), anyString());
   }
 }

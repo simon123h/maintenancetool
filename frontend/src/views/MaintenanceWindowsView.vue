@@ -28,6 +28,8 @@ interface MaintenanceWindow {
   templateName?: string | null;
   overriddenSubject?: string;
   overriddenBody?: string;
+  notificationLeadTimeDays: number;
+  emailsSent?: boolean;
 }
 
 const appStore = useAppStore();
@@ -51,6 +53,7 @@ const { form, reset: resetForm } = useForm<MaintenanceWindow>({
   templateId: '',
   overriddenSubject: '',
   overriddenBody: '',
+  notificationLeadTimeDays: 7,
 });
 const errors = ref<Record<string, string>>({});
 
@@ -89,9 +92,8 @@ onMounted(() => {
 
 const formatDateTime = (dateStr: string) => {
   if (!dateStr) return '';
-  const date = new Date(dateStr);
-  return date.toLocaleString('de-DE', {
-    weekday: 'short',
+  const d = new Date(dateStr);
+  return d.toLocaleString('de-DE', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -119,6 +121,7 @@ const showCreateForm = () => {
     templateId: '',
     overriddenSubject: '',
     overriddenBody: '',
+    notificationLeadTimeDays: 7,
   });
   activeId.value = null;
   isEditing.value = true;
@@ -139,6 +142,7 @@ const showEditForm = (item: MaintenanceWindow) => {
     templateId: item.templateId || '',
     overriddenSubject: item.overriddenSubject || '',
     overriddenBody: item.overriddenBody || '',
+    notificationLeadTimeDays: item.notificationLeadTimeDays != null ? item.notificationLeadTimeDays : 7,
   });
   activeId.value = item.id || null;
   isEditing.value = true;
@@ -331,6 +335,21 @@ watch(
           </div>
         </div>
 
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="winLeadTime">Vorwarnzeit für E-Mails (Tage)</label>
+            <input
+              id="winLeadTime"
+              type="number"
+              min="0"
+              v-model.number="form.notificationLeadTimeDays"
+              class="form-control"
+              placeholder="z. B. 7"
+            />
+            <small class="form-help-text">E-Mails werden automatisch so viele Tage vor Beginn versendet.</small>
+          </div>
+        </div>
+
         <div class="form-group">
           <label for="winDesc">Interne Beschreibung</label>
           <textarea
@@ -407,7 +426,8 @@ watch(
               <th>Wartung & Details</th>
               <th>Zeitraum</th>
               <th>Status</th>
-              <th v-if="canEdit" class="text-right" style="width: 280px">Aktionen</th>
+              <th>E-Mail Benachrichtigung</th>
+              <th v-if="canEdit" class="text-right" style="width: 200px">Aktionen</th>
             </tr>
           </thead>
           <tbody>
@@ -434,9 +454,22 @@ watch(
               <td>
                 <span class="status-badge" :class="win.status.toLowerCase()">{{ win.status }}</span>
               </td>
+              <td>
+                <span v-if="win.emailsSent" class="email-status-badge sent" title="E-Mails bereits versendet">
+                  <i class="mdi mdi-email-check-outline"></i> Gesendet
+                </span>
+                <span
+                  v-else
+                  class="email-status-badge pending"
+                  :title="`Automatischer Versand geplant ${win.notificationLeadTimeDays} Tage vor Beginn`"
+                >
+                  <i class="mdi mdi-clock-outline"></i> Geplant ({{ win.notificationLeadTimeDays }}t Vorwarnung)
+                </span>
+              </td>
               <td v-if="canEdit" class="text-right">
                 <div class="action-cell window-action-cell">
                   <button
+                    v-if="!win.emailsSent"
                     @click="notifyUsers(win.id!)"
                     class="btn btn-primary btn-sm btn-notify-sm"
                     :disabled="sendingNotifications[win.id!]"
@@ -610,6 +643,22 @@ watch(
 .status-badge.cancelled {
   background-color: #f3f4f6;
   color: #4b5563;
+}
+
+.email-status-badge {
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.email-status-badge.sent {
+  color: var(--color-success, #16a34a);
+}
+
+.email-status-badge.pending {
+  color: var(--text-muted, #64748b);
 }
 
 .window-info-cell {

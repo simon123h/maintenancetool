@@ -8,6 +8,7 @@ import de.maintenancetool.error.InvalidOperationException;
 import de.maintenancetool.error.ResourceNotFoundException;
 import de.maintenancetool.template.EmailTemplate;
 import de.maintenancetool.template.EmailTemplateRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -79,9 +80,13 @@ public class MaintenanceWindowService {
             .template(template)
             .overriddenSubject(dto.getOverriddenSubject())
             .overriddenBody(dto.getOverriddenBody())
+            .notificationLeadTimeDays(
+                dto.getNotificationLeadTimeDays() != null ? dto.getNotificationLeadTimeDays() : 7)
+            .emailsSent(false)
             .build();
 
     MaintenanceWindow saved = maintenanceWindowRepository.save(window);
+    saved = checkAndSendImmediateNotification(saved);
     return convertToDto(saved);
   }
 
@@ -116,6 +121,15 @@ public class MaintenanceWindowService {
                           "Email template not found with id: " + dto.getTemplateId()));
     }
 
+    int oldLeadTime =
+        window.getNotificationLeadTimeDays() != null ? window.getNotificationLeadTimeDays() : 7;
+    int newLeadTime =
+        dto.getNotificationLeadTimeDays() != null ? dto.getNotificationLeadTimeDays() : 7;
+
+    if (!window.getStartTime().equals(dto.getStartTime()) || oldLeadTime != newLeadTime) {
+      window.setEmailsSent(false);
+    }
+
     window.setTitle(dto.getTitle());
     window.setDescription(dto.getDescription());
     window.setStartTime(dto.getStartTime());
@@ -125,8 +139,10 @@ public class MaintenanceWindowService {
     window.setTemplate(template);
     window.setOverriddenSubject(dto.getOverriddenSubject());
     window.setOverriddenBody(dto.getOverriddenBody());
+    window.setNotificationLeadTimeDays(newLeadTime);
 
     MaintenanceWindow saved = maintenanceWindowRepository.save(window);
+    saved = checkAndSendImmediateNotification(saved);
     return convertToDto(saved);
   }
 
@@ -138,7 +154,7 @@ public class MaintenanceWindowService {
     maintenanceWindowRepository.deleteById(id);
   }
 
-  @Transactional(readOnly = true)
+  @Transactional
   public void sendNotifications(UUID id) {
     MaintenanceWindow window =
         maintenanceWindowRepository
@@ -146,9 +162,20 @@ public class MaintenanceWindowService {
             .orElseThrow(
                 () -> new ResourceNotFoundException("Maintenance window not found with id: " + id));
 
+    sendNotificationsInternal(window);
+  }
+
+  private void sendNotificationsInternal(MaintenanceWindow window) {
+    if (Boolean.TRUE.equals(window.getEmailsSent())) {
+      log.info("Notifications already sent for window: {}, skipping.", window.getTitle());
+      return;
+    }
+
     Application app = window.getApplication();
     if (app.getUsers().isEmpty()) {
-      log.info("No users mapped to application {}, skipping email notifications.", app.getName());
+      log.info("No users mapped to application {}, marking notifications as sent.", app.getName());
+      window.setEmailsSent(true);
+      maintenanceWindowRepository.save(window);
       return;
     }
 
@@ -181,10 +208,52 @@ public class MaintenanceWindowService {
       String body = substituteVariables(bodyPattern, user, window);
       emailService.sendMail(user.getEmail(), subject, body);
     }
+
+    window.setEmailsSent(true);
+    maintenanceWindowRepository.save(window);
     log.info(
         "Triggered {} notification emails for maintenance window {}",
         app.getUsers().size(),
         window.getTitle());
+  }
+
+  private MaintenanceWindow checkAndSendImmediateNotification(MaintenanceWindow window) {
+    if (Boolean.TRUE.equals(window.getEmailsSent())) {
+      return window;
+    }
+    LocalDateTime threshold =
+        LocalDateTime.now()
+            .plusDays(
+                window.getNotificationLeadTimeDays() != null
+                    ? window.getNotificationLeadTimeDays()
+                    : 7);
+    if (window.getStartTime().isBefore(threshold) || window.getStartTime().isEqual(threshold)) {
+      log.info(
+          "Immediate email dispatch triggered for window '{}' due to proximity to start time.",
+          window.getTitle());
+      sendNotificationsInternal(window);
+    }
+    return window;
+  }
+
+  @org.springframework.scheduling.annotation.Scheduled(
+      cron = "0 */15 * * * *") // Runs every 15 minutes
+  @Transactional
+  public void checkAndSendScheduledNotifications() {
+    log.debug("Checking for scheduled maintenance window notifications...");
+    List<MaintenanceWindow> unsentWindows = maintenanceWindowRepository.findByEmailsSentFalse();
+    LocalDateTime now = LocalDateTime.now();
+    for (MaintenanceWindow window : unsentWindows) {
+      LocalDateTime threshold =
+          now.plusDays(
+              window.getNotificationLeadTimeDays() != null
+                  ? window.getNotificationLeadTimeDays()
+                  : 7);
+      if (window.getStartTime().isBefore(threshold) || window.getStartTime().isEqual(threshold)) {
+        log.info("Auto-sending scheduled notifications for window: {}", window.getTitle());
+        sendNotificationsInternal(window);
+      }
+    }
   }
 
   private String substituteVariables(String text, ApplicationUser user, MaintenanceWindow window) {
@@ -214,6 +283,9 @@ public class MaintenanceWindowService {
         .templateName(window.getTemplate() != null ? window.getTemplate().getName() : null)
         .overriddenSubject(window.getOverriddenSubject())
         .overriddenBody(window.getOverriddenBody())
+        .notificationLeadTimeDays(
+            window.getNotificationLeadTimeDays() != null ? window.getNotificationLeadTimeDays() : 7)
+        .emailsSent(window.getEmailsSent() != null ? window.getEmailsSent() : false)
         .build();
   }
 }

@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MaintenanceWindowRepository extends JpaRepository<MaintenanceWindow, UUID> {
   List<MaintenanceWindow> findByApplicationId(UUID applicationId);
+
+  List<MaintenanceWindow> findByEmailsSentFalse();
 }

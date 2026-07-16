@@ -49,4 +49,12 @@ public class MaintenanceWindow {
   @Lob
   @Column(name = "overridden_body")
   private String overriddenBody;
+
+  @Column(name = "notification_lead_time_days", nullable = false)
+  @Builder.Default
+  private Integer notificationLeadTimeDays = 7;
+
+  @Column(name = "emails_sent", nullable = false)
+  @Builder.Default
+  private Boolean emailsSent = false;
 }

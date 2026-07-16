@@ -22,4 +22,6 @@ public class MaintenanceWindowDto {
   private String templateName;
   private String overriddenSubject;
   private String overriddenBody;
+  private Integer notificationLeadTimeDays;
+  private Boolean emailsSent;
 }
