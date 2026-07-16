@@ -24,20 +24,6 @@ defineProps<{
         <router-link to="/application-users" class="nav-btn" active-class="active"> App-Benutzer </router-link>
 
         <router-link to="/email-templates" class="nav-btn" active-class="active"> Vorlagen </router-link>
-
-        <router-link
-          v-if="currentUser?.rollen.includes('ROLE_ADMIN')"
-          to="/admin"
-          class="nav-btn admin-btn"
-          active-class="active"
-        >
-          Administration
-        </router-link>
-
-        <a href="/help/" target="_blank" class="nav-btn help-link">
-          Hilfe & FAQ
-          <i class="mdi mdi-open-in-new external-icon" style="font-size: 0.95rem"></i>
-        </a>
       </nav>
 
       <!-- User Profile Header Section -->
@@ -47,9 +33,6 @@ defineProps<{
         </div>
         <div class="user-info">
           <span class="user-name">{{ currentUser.vollerName }}</span>
-          <span class="user-roles">
-            {{ currentUser.rollen.map((r) => r.replace('ROLE_', '')).join(', ') }}
-          </span>
         </div>
       </div>
     </div>

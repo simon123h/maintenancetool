@@ -5,11 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vitepress build help",
+    "build": "vite build",
     "preview": "vite preview",
-    "help:dev": "vitepress dev help --port 5173",
-    "help:build": "vitepress build help",
-    "help:preview": "vitepress preview help",
     "lint": "eslint . --ext .js,.ts,.vue --max-warnings 0",
     "format:check": "prettier --check \"src/**/*.{ts,vue,css,html}\"",
     "format:write": "prettier --write \"src/**/*.{ts,vue,css,html}\"",
@@ -36,7 +33,6 @@
     "prettier": "^3.2.5",
     "typescript": "^5.2.2",
     "vite": "^6.4.3",
-    "vitepress": "^1.0.0-rc.45",
     "vitest": "^4.1.9",
     "vue-tsc": "^3.3.5"
   },

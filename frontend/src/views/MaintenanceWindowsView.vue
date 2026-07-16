@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useAppStore } from '../store/appStore';
-import { useAuth } from '../composables/useAuth';
 import { useForm } from '../composables/useForm';
 
 interface Application {
@@ -32,13 +31,12 @@ interface MaintenanceWindow {
 }
 
 const appStore = useAppStore();
-const { isAdmin, isManager } = useAuth();
 
 const windows = ref<MaintenanceWindow[]>([]);
 const applications = ref<Application[]>([]);
 const templates = ref<EmailTemplate[]>([]);
 
-const canEdit = computed(() => isAdmin.value || isManager.value);
+const canEdit = ref(true);
 const isEditing = ref(false);
 const activeId = ref<string | null>(null);
 const sendingNotifications = ref<Record<string, boolean>>({});
