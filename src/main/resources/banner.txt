@@ -1,3 +1,3 @@
 ${AnsiColor.BRIGHT_BLUE}
- :: Schulungsplanung ::       Version: v@project.version@ (Spring Boot v${spring-boot.version})
+ :: Maintenance Tool ::       Version: v@project.version@ (Spring Boot v${spring-boot.version})
 ${AnsiColor.DEFAULT}

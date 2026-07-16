@@ -69,5 +69,5 @@ jobs:
       - name: Upload Build Artifact (WAR)
         uses: actions/upload-artifact@v4
         with:
-          name: schulungsplanung-war
+          name: maintenance-tool-war
           path: target/*.war

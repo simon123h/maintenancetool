@@ -4,7 +4,7 @@
 
     <!-- Standard-Pfade und Muster -->
     <property name="LOG_PATH" value="${user.dir}/logs" />
-    <property name="LOG_FILE" value="schulungsplanung" />
+    <property name="LOG_FILE" value="maintenance-tool" />
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
 
     <!-- Konsolen-Appender (für Entwicklung) -->
@@ -15,7 +15,7 @@
     </appender>
 
     <!-- Logger-Konfigurationen -->
-    <logger name="de.schulungsplanung" level="DEBUG" />
+    <logger name="de.maintenancetool" level="DEBUG" />
     <logger name="org.springframework.web" level="INFO" />
     <logger name="org.springframework.security" level="INFO" />
     <logger name="org.hibernate.SQL" level="INFO" />

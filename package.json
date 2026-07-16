@@ -1,5 +1,5 @@
 {
-  "name": "schulungsplanung-parent",
+  "name": "maintenance-tool-parent",
   "version": "1.0.0",
   "private": true,
   "description": "Zentrale package.json für komfortable Entwicklungs- und Testskripte",

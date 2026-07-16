@@ -60,14 +60,14 @@ jobs:
           echo "Erstelle Release-Dateien für Tag: $TAG_NAME (Version: $VERSION_NUM)"
           
           # Kopiere das exakt benannte WAR-Artefakt (keine ungenauen Wildcards mehr)
-          cp target/schulungsplanung-${VERSION_NUM}.war target/schulungsplanung-${TAG_NAME}.war
+          cp target/maintenance-tool-${VERSION_NUM}.war target/maintenance-tool-${TAG_NAME}.war
 
       # 6. GitHub Release erstellen und das WAR-Artefakt hochladen
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            target/schulungsplanung-v*.war
+            target/maintenance-tool-v*.war
           draft: false
           prerelease: ${{ env.IS_PRERELEASE }}
           generate_release_notes: true

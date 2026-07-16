@@ -37,27 +37,5 @@
                                  referencedTableName="user_account" referencedColumnNames="id"
                                  constraintName="fk_user_rollen_to_user" onDelete="CASCADE"/>
 
-        <!-- 3. Tabelle: stored_file (Dateimetadaten) -->
-        <createTable tableName="stored_file">
-            <column name="id" type="UUID">
-                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_stored_file"/>
-            </column>
-            <column name="original_dateiname" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="dateipfad" type="VARCHAR(512)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="content_type" type="VARCHAR(100)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="dateigroesse" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="upload_datum" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
     </changeSet>
 </databaseChangeLog>
