@@ -15,9 +15,15 @@ defineProps<{
       </div>
 
       <nav class="nav-links">
-        <router-link to="/" class="nav-btn" active-class="active" exact-active-class="active">
-          Dashboard
-        </router-link>
+        <router-link to="/" class="nav-btn" active-class="active" exact-active-class="active"> Dashboard </router-link>
+
+        <router-link to="/maintenance-windows" class="nav-btn" active-class="active"> Wartungsfenster </router-link>
+
+        <router-link to="/applications" class="nav-btn" active-class="active"> Applikationen </router-link>
+
+        <router-link to="/application-users" class="nav-btn" active-class="active"> App-Benutzer </router-link>
+
+        <router-link to="/email-templates" class="nav-btn" active-class="active"> Vorlagen </router-link>
 
         <router-link
           v-if="currentUser?.rollen.includes('ROLE_ADMIN')"

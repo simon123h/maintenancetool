@@ -11,9 +11,7 @@ import AdminUsersTab from '../components/AdminUsersTab.vue';
 
     <!-- Sub-Tabs (User Management only for now) -->
     <div class="admin-subnav">
-      <button class="btn-subnav active">
-        Benutzerberechtigungen
-      </button>
+      <button class="btn-subnav active">Benutzerberechtigungen</button>
     </div>
 
     <AdminUsersTab />

@@ -3,12 +3,36 @@ import { useAuthStore } from '../store/authStore';
 import { useAuth } from '../composables/useAuth';
 import DashboardView from '../views/DashboardView.vue';
 import AdminView from '../views/AdminView.vue';
+import ApplicationsView from '../views/ApplicationsView.vue';
+import ApplicationUsersView from '../views/ApplicationUsersView.vue';
+import EmailTemplatesView from '../views/EmailTemplatesView.vue';
+import MaintenanceWindowsView from '../views/MaintenanceWindowsView.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Dashboard',
     component: DashboardView,
+  },
+  {
+    path: '/applications',
+    name: 'Applications',
+    component: ApplicationsView,
+  },
+  {
+    path: '/application-users',
+    name: 'ApplicationUsers',
+    component: ApplicationUsersView,
+  },
+  {
+    path: '/email-templates',
+    name: 'EmailTemplates',
+    component: EmailTemplatesView,
+  },
+  {
+    path: '/maintenance-windows',
+    name: 'MaintenanceWindows',
+    component: MaintenanceWindowsView,
   },
   {
     path: '/admin',
