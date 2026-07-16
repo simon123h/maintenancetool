@@ -10,7 +10,7 @@ Eine einfache, moderne Webanwendung zur Planung von Wartungsfenstern, Verwaltung
 
 - **Anwendungsverwaltung**: Verwalten Sie die Liste Ihrer gehosteten Web-Applikationen und die zugeordneten Benutzer.
 - **Wartungsplanung**: Planen und koordinieren Sie Wartungsfenster für jede Anwendung.
-- **E-Mail-Benachrichtigungen**: Automatischer E-Mail-Versand basierend auf konfigurierbaren E-Mail-Templates.
+- **E-Mail-Benachrichtigungen**: Automatischer E-Mail-Versand basierend auf konfigurierbaren E-Mail-Templates (mit anpassbarer Vorwarnzeit und Statusverfolgung im H2/SQL-Backend).
 - **Authentifizierung**: Wahlweise LDAP-Anbindung oder SAML2-Authentifizierung.
 
 ---
@@ -65,7 +65,7 @@ Auf der Hauptebene stehen praktische npm-Skripte für den lokalen Entwicklungs-W
 
 | Befehl              | Beschreibung                                                            |
 | :------------------ | :---------------------------------------------------------------------- |
-| `npm run dev`       | Startet Backend, Frontend-Dev-Server und Hilfe-Vorschau parallel        |
+| `npm run dev`       | Startet Backend und Frontend-Dev-Server parallel                        |
 | `npm run test`      | Führt die vollständige Maven-Backend-Testsuite aus                      |
 | `npm run format`    | Formatiert Java-Backend (Spotless) und Frontend-Code (Prettier)         |
 | `npm run lint`      | Validiert Code-Formatierung und führt ESLint aus                        |

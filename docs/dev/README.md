@@ -74,49 +74,12 @@ Für die lokale Entwicklung (`spring.profiles.active=dev`) wird ein eingebettete
 
 ### Bereitgestellte Test-Benutzer für lokale Tests:
 
-| Benutzername (UID) | Passwort | E-Mail | Vorgesehene DB-Rolle |
-| :--- | :--- | :--- | :--- |
-| `admin` | `adminpassword` | `admin@maintenancetool.de` | `ROLE_ADMIN` |
-| `manager` | `managerpassword` | `manager@maintenancetool.de` | `ROLE_MANAGER` |
-| `user` | `userpassword` | `user@maintenancetool.de` | `ROLE_TEILNEHMER` |
+| Benutzername (UID) | Passwort | E-Mail |
+| :--- | :--- | :--- |
+| `admin` | `12345` | `admin@maintenancetool.de` |
+| `manager` | `12345` | `manager@maintenancetool.de` |
+| `user` | `12345` | `user@maintenancetool.de` |
 
 > [!NOTE]
-> Die Zuordnung der Rollen findet nicht im LDAP statt. Wenn sich einer dieser User zum ersten Mal lokal einloggt, wird ein `UserAccount`-Eintrag in der H2-In-Memory-Datenbank erzeugt. Als Administrator können Sie im Admin-Panel die Berechtigungsstufen anpassen.
+> **Rollen & Rechte**: Die Anwendung verzichtet bewusst auf ein restriktives Rollensystem. Jeder authentifizierte Benutzer hat vollen Zugriff auf alle Kernfunktionen (Applikationen, Wartungsfenster, Vorlagen und Benachrichtigungen).
 
----
-
-## 5. Anwender-Hilfe (Vitepress-Dokumentation)
-
-Die Anwender-Dokumentation ist direkt in die Webapplikation integriert. Sie wird mit **Vitepress** gebaut und ist im laufenden System unter der URL-Route `/help` erreichbar.
-
-### 5.1 Struktur der integrierten Hilfe
-Die Dokumentation-as-Code-Inhalte für die Anwender-Hilfe liegen im Quellcode unter `frontend/help/`. Dadurch können sie von Entwicklern im gleichen Git-Workflow gepflegt werden wie der Anwendungscode selbst.
-
-Folgende Dokumente sind im System hinterlegt:
-*   [**Einführung (Startseite)**](../../frontend/help/index.md): Grundlegende Einweisung in das Maintenance Tool.
-*   [**Anleitung für Administratoren**](../../frontend/help/admin.md): Rechtevergabe im Admin-Panel.
-*   [**FAQ & Hilfe**](../../frontend/help/faq.md): Schnelle Antworten auf häufig gestellte Fragen (z. B. Wartungsankündigungen, E-Mails).
-
-### 5.2 Lokale Bearbeitung (Hot-Reload)
-*   Um die Hilfe live im Browser mit Hot-Reload zu bearbeiten, wechseln Sie in das Frontend-Verzeichnis und starten Sie das Hilfe-Dev-Skript:
-    ```bash
-    cd frontend
-    npm run help:dev
-    ```
-*   Die Hilfe ist dann lokal unter `http://localhost:5173/help/` erreichbar.
-
-### 5.3 Bearbeitung & Erweiterung der Hilfe
-Da alle Seiten im Markdown-Format (`.md`) verfasst sind, können neue Hilfeartikel oder Aktualisierungen einfach durch das Erstellen/Bearbeiten von Markdown-Dateien im Verzeichnis `frontend/help/` vorgenommen werden.
-
-#### Hinzufügen einer neuen Seite:
-1.  Erstellen Sie eine neue Datei, z. B. `frontend/help/neues-thema.md`.
-2.  Tragen Sie Ihre Inhalte in Standard-Markdown ein.
-3.  Registrieren Sie die neue Seite in der Navigationsstruktur in der Datei `frontend/help/.vitepress/config.ts`:
-    ```typescript
-    items: [
-      { text: 'Einführung', link: '/' },
-      { text: 'Neues Thema', link: '/neues-thema' }, // <-- Hinzufügen
-      ...
-    ]
-    ```
-4.  Beim nächsten Maven-Build (`mvn clean package`) wird die Hilfeseite automatisch neu generiert und in die ausführbare WAR-Datei integriert.
