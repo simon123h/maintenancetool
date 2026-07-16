@@ -1,6 +1,6 @@
 # Beitrags- und Entwicklungsrichtlinien (Contributing Guidelines)
 
-Willkommen im Entwicklungsteam der Schulungsplanungs-App! Dieses Dokument beschreibt die verbindlichen Qualitätsstandards, Programmierrichtlinien und Workflows für alle Entwickler und automatisierten Coding-Assistenten. 
+Willkommen im Entwicklungsteam der Maintenance-Tool-App! Dieses Dokument beschreibt die verbindlichen Qualitätsstandards, Programmierrichtlinien und Workflows für alle Entwickler und automatisierten Coding-Assistenten. 
 
 ---
 
@@ -38,11 +38,11 @@ Sämtliche Commit-Nachrichten müssen dem **Conventional Commits**-Standard ents
 Das gesamte Frontend liegt im Verzeichnis `frontend/`. Für Beitragsänderungen gelten folgende technologische Standards:
 
 *   **Framework-Präferenz:** Verwenden Sie **Vue.js 3** mit der **Composition API** (Verwendung von `<script setup lang="ts">`). Verwenden Sie *kein* React.
-*   **Typisierung:** Bevorzugen Sie konsequent **TypeScript** gegenüber JavaScript. Definieren Sie klare Schnittstellen und Typen in [types.ts](file:///home/simon/Code/schulungsplanung/frontend/src/types.ts).
+*   **Typisierung:** Bevorzugen Sie konsequent **TypeScript** gegenüber JavaScript. Definieren Sie klare Schnittstellen und Typen in [types.ts](file:///home/simon/Code/unpackme/schulungsplanung/frontend/src/types.ts).
 *   **KISS-Prinzip & Modularität:** 
     *   Vermeiden Sie monolithische Komponenten. Teilen Sie Ansichten in kleine, überschaubare, wiederverwendbare Komponenten auf.
     *   Nutzen Sie **Scoped Styles** (`<style scoped>`) in Vue-Dateien, um Styling-Kollisionen zu vermeiden.
-    *   Verwenden Sie standardisierte, HSL-basierte globale CSS-Variablen aus `style.css` zur Farbdarstellung (Unterstützung für Corporate Branding und Themes).
+    *   Verwenden Sie standardisierte, HSL-basierte globale CSS-Variablen aus `style.css` zur Farbdarstellung (Theme-Unterstützung).
 
 ---
 
@@ -51,7 +51,7 @@ Das gesamte Frontend liegt im Verzeichnis `frontend/`. Für Beitragsänderungen 
 Das Java-Backend im Verzeichnis `src/main/` folgt klassischen Spring Boot-Best-Practices:
 
 *   **Paketstruktur (Package-by-Feature):**
-    *   Strukturieren Sie Klassen nach funktionalen Domänen/Features (z. B. `de.schulungsplanung.schulung`, `de.schulungsplanung.user`, `de.schulungsplanung.teilnahme`) anstelle von rein technischen Layern.
+    *   Strukturieren Sie Klassen nach funktionalen Domänen/Features (z. B. `de.maintenancetool.user`, `de.maintenancetool.communication`) anstelle von rein technischen Layern.
 *   **Architektur-Schichten (KISS):**
     *   Halten Sie eine klare Trennung zwischen **Entity** (Datenbankmodell), **DTO** (Datenübertragungskapsel) und **Controller** (Schnittstellen-Definition) ein.
     *   Verwenden Sie JPA-Repositories (`Spring Data JPA`) für sämtliche Datenbankoperationen.
@@ -71,10 +71,8 @@ Das Java-Backend im Verzeichnis `src/main/` folgt klassischen Spring Boot-Best-P
 
 Die Dokumentation des Projekts befindet sich im Ordner `docs/`. Jede Code-Änderung, die das Verhalten oder die Bereitstellung beeinflusst, muss in der zugehörigen Dokumentation nachgezogen werden.
 
-*   **Fachliche Anforderungen:** Müssen in der **Requirements-Doku (req42)** unter [docs/requirements/](file:///home/simon/Code/schulungsplanung/docs/requirements/README.md) dokumentiert werden.
-*   **Technische Architektur:** Muss in der **Architektur-Doku (arc42)** unter [docs/architecture/](file:///home/simon/Code/schulungsplanung/docs/architecture/README.md) dokumentiert werden (Strukturierung nach Bausteinsicht, Kontextabgrenzung, Bereitstellungssicht etc.).
+*   **Entwicklungs-Handbuch:** Muss unter [docs/dev/](file:///home/simon/Code/unpackme/schulungsplanung/docs/dev/README.md) dokumentiert werden.
 *   **Diagramme:** Erstellen Sie technische Flussdiagramme, ER-Modelle, Bausteinsichten und Bereitstellungsdiagramme ausschließlich als **Mermaid.js**-Codeblöcke direkt in den Markdown-Dateien.
-*   **Hosting & Betrieb:** Aktualisieren Sie Konfigurationsparameter oder VM-Service-Vorgaben in der **Hosting-Doku** unter [docs/hosting/](file:///home/simon/Code/schulungsplanung/docs/hosting/README.md).
 
 ---
 

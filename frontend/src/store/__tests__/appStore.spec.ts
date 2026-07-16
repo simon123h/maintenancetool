@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { useAppStore } from '../appStore';
 import { useAuthStore } from '../authStore';
-import { useBrandingStore } from '../brandingStore';
 
 describe('appStore', () => {
   const mockLocation = { href: '' };
@@ -84,13 +83,11 @@ describe('appStore', () => {
   });
 
   describe('initApp flow', () => {
-    it('should initialize app sequence correctly for normal participant user', async () => {
+    it('should initialize app sequence correctly for normal user', async () => {
       const appStore = useAppStore();
       const authStore = useAuthStore();
-      const brandingStore = useBrandingStore();
 
       // Spy on store loaders
-      const loadBrandingSpy = vi.spyOn(brandingStore, 'loadBranding').mockResolvedValue(undefined);
       const loadProfileSpy = vi.spyOn(authStore, 'loadProfile').mockImplementation(async () => {
         authStore.currentUser = {
           id: 'u-1',
@@ -105,7 +102,6 @@ describe('appStore', () => {
       await appStore.initApp();
 
       expect(appStore.loading).toBe(false);
-      expect(loadBrandingSpy).toHaveBeenCalled();
       expect(loadProfileSpy).toHaveBeenCalled();
       expect(loadUsersSpy).not.toHaveBeenCalled();
     });
@@ -113,10 +109,8 @@ describe('appStore', () => {
     it('should initialize app sequence correctly for admin user and load users', async () => {
       const appStore = useAppStore();
       const authStore = useAuthStore();
-      const brandingStore = useBrandingStore();
 
       // Spy on store loaders
-      const loadBrandingSpy = vi.spyOn(brandingStore, 'loadBranding').mockResolvedValue(undefined);
       const loadProfileSpy = vi.spyOn(authStore, 'loadProfile').mockImplementation(async () => {
         authStore.currentUser = {
           id: 'u-1',
@@ -137,9 +131,7 @@ describe('appStore', () => {
     it('should stop initApp sequence if profile loader redirects / has no user', async () => {
       const appStore = useAppStore();
       const authStore = useAuthStore();
-      const brandingStore = useBrandingStore();
 
-      vi.spyOn(brandingStore, 'loadBranding').mockResolvedValue(undefined);
       vi.spyOn(authStore, 'loadProfile').mockImplementation(async () => {
         authStore.currentUser = null; // simulate failed auth
       });

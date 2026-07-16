@@ -2,13 +2,11 @@
 import { onMounted } from 'vue';
 import { useAppStore } from './store/appStore';
 import { useAuthStore } from './store/authStore';
-import { useBrandingStore } from './store/brandingStore';
 import HeaderNav from './components/HeaderNav.vue';
 import AlertNotification from './components/AlertNotification.vue';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();
-const brandingStore = useBrandingStore();
 
 onMounted(() => {
   appStore.initApp();
@@ -22,7 +20,7 @@ onMounted(() => {
   </div>
   <div v-else class="app-container">
     <!-- Premium Navigation Header -->
-    <HeaderNav :currentUser="authStore.currentUser" :branding="brandingStore.branding" />
+    <HeaderNav :currentUser="authStore.currentUser" />
 
     <!-- Unified Notifications -->
     <AlertNotification

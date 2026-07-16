@@ -12,7 +12,7 @@ describe('useAuth Composable', () => {
 
   const createMockUser = (rollen: string[]): UserAccount => ({
     id: 'test-user-id',
-    mailAdresse: 'test@schulungsplanung.de',
+    mailAdresse: 'test@maintenancetool.de',
     vollerName: 'Max Mustermann',
     loginName: 'maxm',
     rollen,

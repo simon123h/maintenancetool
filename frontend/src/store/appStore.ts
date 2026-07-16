@@ -2,7 +2,6 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { apiFetch } from './api';
 import { useAuthStore } from './authStore';
-import { useBrandingStore } from './brandingStore';
 
 export const useAppStore = defineStore('app', () => {
   const loading = ref(true);
@@ -11,10 +10,8 @@ export const useAppStore = defineStore('app', () => {
 
   const initApp = async () => {
     const authStore = useAuthStore();
-    const brandingStore = useBrandingStore();
 
     loading.value = true;
-    await brandingStore.loadBranding();
     await authStore.loadProfile();
     if (!authStore.currentUser) {
       // If the user is not logged in (or session expired), stop loading here

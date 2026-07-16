@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { UserAccount, Branding } from '../types';
+import type { UserAccount } from '../types';
 
 defineProps<{
   currentUser: UserAccount | null;
-  branding: Branding;
 }>();
 </script>
 
@@ -11,15 +10,8 @@ defineProps<{
   <header>
     <div class="nav-bar">
       <div class="brand">
-        <!-- Render custom logo image if provided, otherwise default SVG icon -->
-        <img
-          v-if="branding.logoPath && branding.logoPath.trim() !== ''"
-          :src="branding.logoPath"
-          alt="Logo"
-          class="custom-logo"
-        />
-        <i v-else class="mdi mdi-server-network" style="font-size: 1.5rem; margin-right: 0.25rem"></i>
-        <span>{{ branding.companyName || 'Maintenance Tool' }}</span>
+        <i class="mdi mdi-server-network" style="font-size: 1.5rem; margin-right: 0.25rem"></i>
+        <span>Maintenance Tool</span>
       </div>
 
       <nav class="nav-links">
