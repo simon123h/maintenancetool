@@ -1,0 +1,20 @@
+{
+  "name": "schulungsplanung-parent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zentrale package.json für komfortable Entwicklungs- und Testskripte",
+  "scripts": {
+    "dev": "npx concurrently -n \"backend,frontend,help\" -c \"blue,green,magenta\" \"mvn spring-boot:run -q\" \"npm --prefix frontend run dev\" \"npm --prefix frontend run help:dev\"",
+    "test": "mvn test",
+    "test:frontend": "npm --prefix frontend run test",
+    "test:frontend:coverage": "npm --prefix frontend run test:coverage",
+    "format": "mvn spotless:apply && npm --prefix frontend run format:write",
+    "lint": "mvn spotless:check && npm --prefix frontend run lint && npm --prefix frontend run format:check",
+    "build": "mvn clean package",
+    "db:update": "mvn liquibase:update",
+    "clean": "mvn clean"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

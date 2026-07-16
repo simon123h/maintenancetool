@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: maintenance-tool-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Maintenance2026!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "Maintenance2026!", "-Q", "SELECT 1", "-C"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Automatische Erstellung der Datenbank 'maintenancedb' nach dem Start des MS SQL Servers
+  mssql-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: maintenance-tool-db-init
+    depends_on:
+      mssql:
+        condition: service_healthy
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        echo "Creating database 'maintenancedb' if it does not exist..."
+        /opt/mssql-tools18/bin/sqlcmd -S mssql -U sa -P 'Maintenance2026!' -Q "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'maintenancedb') CREATE DATABASE [maintenancedb];" -C
+        echo "Database check complete."
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: maintenance-tool-keycloak
+    command: start-dev
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=adminpass
+      - KC_HTTP_PORT=8080
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:v1.15
+    container_name: maintenance-tool-mail
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI port
+    restart: unless-stopped
+
+volumes:
+  mssql-data:
+    driver: local

@@ -1,0 +1,117 @@
+name: Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # 1. Quellcode auschecken
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Java 21 einrichten
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. Node.js 20 einrichten (für npm-Caching, wird vom frontend-maven-plugin verwendet)
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package.json'
+
+      # 4. Maven-Version basierend auf dem Git-Tag dynamisch setzen und Release-Artefakt bauen
+      - name: Set Version and Build Release Artifact
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION_NUM="${TAG_NAME#v}"
+          echo "Setze Maven-Projektversion auf: $VERSION_NUM"
+          
+          # Detect if this is a pre-release (contains a hyphen)
+          if [[ "$TAG_NAME" == *-* ]]; then
+            echo "IS_PRERELEASE=true" >> $GITHUB_ENV
+          else
+            echo "IS_PRERELEASE=false" >> $GITHUB_ENV
+          fi
+          
+          mvn versions:set -DnewVersion="$VERSION_NUM" -B
+          mvn clean package -DskipTests -B
+
+      # 5. Artefakte für den Release vorbereiten
+      - name: Prepare Release Artifacts
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION_NUM="${TAG_NAME#v}"
+          echo "Erstelle Release-Dateien für Tag: $TAG_NAME (Version: $VERSION_NUM)"
+          
+          # Kopiere das exakt benannte WAR-Artefakt (keine ungenauen Wildcards mehr)
+          cp target/schulungsplanung-${VERSION_NUM}.war target/schulungsplanung-${TAG_NAME}.war
+
+      # 6. GitHub Release erstellen und das WAR-Artefakt hochladen
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            target/schulungsplanung-v*.war
+          draft: false
+          prerelease: ${{ env.IS_PRERELEASE }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 7. Version für den nächsten Entwicklungszyklus erhöhen und committen
+      - name: Bump Version to Next Snapshot
+        run: |
+          # Git-Konfiguration einrichten
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Branch 'main' auschecken (da standardmäßig der Tag-Commit im Detached-HEAD-Modus ausgecheckt ist)
+          git checkout main
+          
+          # Nächste Snapshot-Version berechnen (z.B. v0.1.0 -> 0.1.1-SNAPSHOT)
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION_NUM="${TAG_NAME#v}"
+          
+          # Strip any prerelease suffix (e.g., 1.2.3-rc1 -> 1.2.3)
+          BASE_VERSION="${VERSION_NUM%%-*}"
+          IFS='.' read -r major minor patch <<< "$BASE_VERSION"
+          
+          if [[ "$major" =~ ^[0-9]+$ ]] && [[ "$minor" =~ ^[0-9]+$ ]] && [[ "$patch" =~ ^[0-9]+$ ]]; then
+            next_patch=$((patch + 1))
+            NEXT_SNAPSHOT_VERSION="${major}.${minor}.${next_patch}-SNAPSHOT"
+          else
+            NEXT_SNAPSHOT_VERSION="${VERSION_NUM}-SNAPSHOT"
+          fi
+          
+          echo "Erhöhe Version von $VERSION_NUM auf $NEXT_SNAPSHOT_VERSION..."
+          
+          # Version in pom.xml setzen und bestätigen
+          mvn versions:set -DnewVersion="$NEXT_SNAPSHOT_VERSION" -B
+          mvn versions:commit -B
+          
+          # Änderungen committen und pushen (mit [skip ci] zur Vermeidung unnötiger CI-Runs)
+          git add pom.xml
+          git commit -m "chore(version): bump version to $NEXT_SNAPSHOT_VERSION [skip ci]"
+          
+          # Versuche Änderungen zu pushen (fällt grazil aus falls Branch geschützt ist)
+          if git push origin main; then
+            echo "Nächste Snapshot-Version erfolgreich gepusht!"
+          else
+            echo "::warning::Konnte die nächste Snapshot-Version nicht auf 'main' pushen. Dies ist üblich, wenn der Branch geschützt ist oder Schreibrechte fehlen."
+          fi

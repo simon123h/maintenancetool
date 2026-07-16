@@ -1,0 +1,73 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Quellcode auschecken
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Java 21 einrichten
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. Node.js 20 einrichten (für npm-Caching, wird vom frontend-maven-plugin verwendet)
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package.json'
+
+      # 3.5. Frontend-Abhängigkeiten installieren (für Linting & Formatting im CI-Runner)
+      - name: Install Frontend Dependencies
+        run: npm --prefix frontend ci
+
+      # 3.6. Backend-Formatierung prüfen (Spotless mit Google Java Format)
+      - name: Check Backend Formatting (Spotless)
+        run: mvn spotless:check -B
+
+      # 3.7. Frontend-Formatierung prüfen (Prettier)
+      - name: Check Frontend Formatting (Prettier)
+        run: npm --prefix frontend run format:check
+
+      # 3.8. Frontend-Linting prüfen (ESLint)
+      - name: Lint Frontend (ESLint)
+        run: npm --prefix frontend run lint
+
+      # 4. Datenbankmigrationen auf frischer H2 (MSSQL-Modus) testen
+      - name: Verify DB Migrations on H2 (MSSQL mode)
+        run: mvn liquibase:update -B
+
+      # 5. Gesamtes Projekt bauen und alle Tests ausführen (Maven + Vue 3 + Vitepress)
+      - name: Build and Test with Maven
+        run: mvn clean package -B -Dspring.jpa.hibernate.ddl-auto=validate
+
+      # 6. Testabdeckung (Coverage) an Codecov hochladen
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: |
+            target/site/jacoco/jacoco.xml
+            frontend/coverage/clover.xml
+          fail_ci_if_error: false
+
+      # 7. WAR-Artefakt archivieren
+      - name: Upload Build Artifact (WAR)
+        uses: actions/upload-artifact@v4
+        with:
+          name: schulungsplanung-war
+          path: target/*.war
