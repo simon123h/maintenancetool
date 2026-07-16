@@ -16,12 +16,12 @@ const templates = ref<EmailTemplate[]>();
 const canEdit = ref(true);
 const isEditing = ref(false);
 const activeId = ref<string | null>(null);
-
-const { form, errors, validate, resetForm } = useForm<EmailTemplate>({
+const { form, reset: resetForm } = useForm<EmailTemplate>({
   name: '',
   subjectPattern: '',
   bodyPattern: '',
 });
+const errors = ref<Record<string, string>>({});
 
 const loadTemplates = async () => {
   try {

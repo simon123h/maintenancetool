@@ -17,10 +17,11 @@ const canEdit = ref(true);
 const isEditing = ref(false);
 const activeId = ref<string | null>(null);
 
-const { form, errors, validate, resetForm } = useForm<ApplicationUser>({
+const { form, reset: resetForm } = useForm<ApplicationUser>({
   email: '',
   name: '',
 });
+const errors = ref<Record<string, string>>({});
 
 const loadUsers = async () => {
   try {

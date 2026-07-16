@@ -41,7 +41,7 @@ const isEditing = ref(false);
 const activeId = ref<string | null>(null);
 const sendingNotifications = ref<Record<string, boolean>>({});
 
-const { form, errors, validate, resetForm } = useForm<MaintenanceWindow>({
+const { form, reset: resetForm } = useForm<MaintenanceWindow>({
   title: '',
   description: '',
   startTime: '',
@@ -52,6 +52,7 @@ const { form, errors, validate, resetForm } = useForm<MaintenanceWindow>({
   overriddenSubject: '',
   overriddenBody: '',
 });
+const errors = ref<Record<string, string>>({});
 
 const loadWindows = async () => {
   try {

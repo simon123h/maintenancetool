@@ -28,11 +28,12 @@ const isEditing = ref(false);
 const activeId = ref<string | null>(null);
 const userToMapId = ref<string>('');
 
-const { form, errors, validate, resetForm } = useForm<Application>({
+const { form, reset: resetForm } = useForm<Application>({
   name: '',
   url: '',
   description: '',
 });
+const errors = ref<Record<string, string>>({});
 
 const loadApplications = async () => {
   try {

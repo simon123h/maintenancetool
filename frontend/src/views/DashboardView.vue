@@ -107,7 +107,7 @@ onMounted(() => {
 }
 
 .welcome-card {
-  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-hover) 100%);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: #ffffff;
   padding: 2.5rem;
   border-radius: var(--border-radius-lg);
