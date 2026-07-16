@@ -107,24 +107,27 @@ onMounted(() => {
 }
 
 .welcome-card {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  color: #ffffff;
+  background-color: #f0f9ff;
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--brand-primary);
+  color: var(--text-primary);
   padding: 2.5rem;
   border-radius: var(--border-radius-lg);
-  box-shadow: var(--box-shadow-md);
+  box-shadow: var(--box-shadow-sm);
 }
 
 .welcome-card h1 {
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
+  color: var(--brand-primary);
 }
 
 .welcome-card .subtitle {
   margin-top: 0.75rem;
   margin-bottom: 0;
   font-size: 1.1rem;
-  opacity: 0.9;
+  color: var(--text-secondary);
 }
 
 .stats-row {
