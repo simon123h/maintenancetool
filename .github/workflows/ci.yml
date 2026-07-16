@@ -57,7 +57,7 @@ jobs:
 
       # 6. Testabdeckung (Coverage) an Codecov hochladen
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: |
